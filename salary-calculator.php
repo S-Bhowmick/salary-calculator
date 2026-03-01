@@ -1,4 +1,5 @@
 <?php
+session_start();
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     // Check if job title, experience, and location are provided
     if (empty($_POST['jobTitle']) || empty($_POST['experience']) || empty($_POST['location'])) {
