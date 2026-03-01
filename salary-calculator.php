@@ -2,26 +2,17 @@
 session_start(); // Start the session to store data
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    // Validate inputs and process salary calculation as before...
-
-    // Store user data in session
-    $_SESSION['userData'] = [
-        'jobTitle' => $jobTitle,
-        'experience' => $experience,
-        'location' => $location,
-        'salaryMessage' => $salaryMessage
-    ];
-
-    // Redirect back to index.html with the result
-    header("Location: index.html?salary=" . urlencode($salaryMessage));
-    exit;
-}
-?>
-
     // Sanitize and validate inputs
     $jobTitle = htmlspecialchars($_POST['jobTitle']);
     $experience = intval($_POST['experience']);
     $location = $_POST['location'];
+
+    // Validate the inputs
+    if (empty($jobTitle) || empty($experience) || empty($location)) {
+        $errorMessage = "Please fill in all fields.";
+        header("Location: index.html?error=" . urlencode($errorMessage));
+        exit;
+    }
 
     if ($experience <= 0 || !is_numeric($experience)) {
         $errorMessage = "Experience must be a positive number.";
@@ -58,8 +49,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $minSalary = $baseSalary[0] + ($experience * 1000); // Add £1000 per year of experience
         $maxSalary = $baseSalary[1] + ($experience * 1500); // Add £1500 per year of experience
 
-        // Calculate tax and NI (previously added code)
-
+        // Calculate tax and NI (previously added code for tax calculation)
         $totalSalary = ($minSalary + $maxSalary) / 2;
         $taxAndNI = calculateTax($totalSalary);
         $netSalary = $totalSalary - $taxAndNI;
@@ -72,12 +62,16 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         exit;
     }
 
-    // Redirect back to index.html with the salary message or error message
-    if (isset($salaryMessage)) {
-        header("Location: index.html?salary=" . urlencode($salaryMessage));
-    } else {
-        header("Location: index.html?error=" . urlencode($errorMessage));
-    }
+    // Store user data in session
+    $_SESSION['userData'] = [
+        'jobTitle' => $jobTitle,
+        'experience' => $experience,
+        'location' => $location,
+        'salaryMessage' => $salaryMessage
+    ];
+
+    // Redirect back to index.html with the salary message
+    header("Location: index.html?salary=" . urlencode($salaryMessage));
     exit;
 }
 ?>
