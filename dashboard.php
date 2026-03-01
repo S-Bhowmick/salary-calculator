@@ -9,5 +9,3 @@ if (!isset($_SESSION['userID'])) {
 
 echo "Welcome, " . $_SESSION['username'];
 ?>
-
-<!-- Add the content of the dashboard -->
