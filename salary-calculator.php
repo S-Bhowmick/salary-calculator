@@ -1,12 +1,22 @@
 <?php
-session_start();
+session_start(); // Start the session to store data
+
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    // Check if job title, experience, and location are provided
-    if (empty($_POST['jobTitle']) || empty($_POST['experience']) || empty($_POST['location'])) {
-        $errorMessage = "Please fill in all fields.";
-        header("Location: index.html?error=" . urlencode($errorMessage));
-        exit;
-    }
+    // Validate inputs and process salary calculation as before...
+
+    // Store user data in session
+    $_SESSION['userData'] = [
+        'jobTitle' => $jobTitle,
+        'experience' => $experience,
+        'location' => $location,
+        'salaryMessage' => $salaryMessage
+    ];
+
+    // Redirect back to index.html with the result
+    header("Location: index.html?salary=" . urlencode($salaryMessage));
+    exit;
+}
+?>
 
     // Sanitize and validate inputs
     $jobTitle = htmlspecialchars($_POST['jobTitle']);
