@@ -53,3 +53,36 @@ button:hover {
     margin-top: 20px;
     font-weight: bold;
 }
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .container {
+        width: 90%; /* Make the form width 90% of the screen on smaller devices */
+    }
+
+    h1 {
+        font-size: 20px;
+    }
+
+    input, select, button {
+        font-size: 16px; /* Make text and form elements larger on smaller screens */
+    }
+}
+
+@media (max-width: 480px) {
+    h1 {
+        font-size: 18px; /* Adjust the title font size on very small screens */
+    }
+
+    .container {
+        padding: 10px; /* Reduce padding on smaller screens */
+    }
+
+    input, select, button {
+        font-size: 14px; /* Further adjust text size on small screens */
+    }
+
+    button {
+        padding: 12px; /* Increase button size for better usability on small screens */
+    }
+}
