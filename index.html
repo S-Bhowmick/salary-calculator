@@ -1,3 +1,4 @@
+<?php session_start(); ?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -7,6 +8,24 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
+    <!-- Display Previous Calculation from Session -->
+    <?php if (isset($_SESSION['userData'])): ?>
+        <div class="previous-data">
+            <h3>Your Previous Calculation</h3>
+            <p><strong>Job Title:</strong> <?php echo htmlspecialchars($_SESSION['userData']['jobTitle']); ?></p>
+            <p><strong>Experience:</strong> <?php echo htmlspecialchars($_SESSION['userData']['experience']); ?> years</p>
+            <p><strong>Location:</strong> <?php echo htmlspecialchars($_SESSION['userData']['location']); ?></p>
+            <p><strong>Salary Estimate:</strong> <?php echo $_SESSION['userData']['salaryMessage']; ?></p>
+        </div>
+    <?php endif; ?>
+
+    <!-- Display Error Message if any -->
+    <?php if (isset($_GET['error'])): ?>
+        <div class="error-message">
+            <p style="color: red;"><?php echo htmlspecialchars($_GET['error']); ?></p>
+        </div>
+    <?php endif; ?>
+
     <div class="container">
         <h1>UK Salary Calculator</h1>
         <form action="salary-calculator.php" method="POST">
@@ -26,12 +45,14 @@
             <button type="submit">Calculate Salary</button>
         </form>
 
+        <!-- Display Salary Results if any -->
         <?php if (isset($_GET['salary'])): ?>
             <div class="result">
                 <h2>Estimated Salary: £<?php echo htmlspecialchars($_GET['salary']); ?></h2>
             </div>
         <?php endif; ?>
     </div>
+
     <script>
     document.querySelector('form').addEventListener('submit', function(e) {
         let jobTitle = document.getElementById('jobTitle').value;
@@ -59,6 +80,6 @@
             return;
         }
     });
-</script>
+    </script>
 </body>
 </html>
