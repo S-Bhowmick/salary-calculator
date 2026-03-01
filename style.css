@@ -1,38 +1,43 @@
 body {
-    font-family: Arial, sans-serif;
-    background-color: #f4f4f4;
+    font-family: 'Arial', sans-serif;
+    background-color: #f4f7fa;
     margin: 0;
     padding: 0;
 }
 
 .container {
-    width: 300px;
-    margin: 100px auto;
-    padding: 20px;
+    width: 100%;
+    max-width: 600px;
+    margin: 50px auto;
+    padding: 30px;
     background-color: #fff;
     border-radius: 10px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    animation: fadeIn 0.5s ease-out;
 }
 
 h1 {
     text-align: center;
-    font-size: 24px;
+    font-size: 28px;
+    margin-bottom: 20px;
+    color: #333;
 }
 
 form {
     display: flex;
     flex-direction: column;
+    gap: 20px;
 }
 
 label {
-    margin-bottom: 5px;
-    font-size: 14px;
+    font-size: 16px;
+    color: #555;
 }
 
 input, select, button {
-    padding: 10px;
-    margin-bottom: 15px;
-    border-radius: 5px;
+    padding: 12px;
+    font-size: 16px;
+    border-radius: 8px;
     border: 1px solid #ccc;
 }
 
@@ -41,48 +46,84 @@ button {
     color: white;
     cursor: pointer;
     border: none;
+    transition: background-color 0.3s ease;
 }
 
 button:hover {
     background-color: #45a049;
 }
 
-.result {
+button:focus {
+    outline: none;
+}
+
+.result, .previous-data, .error-message {
     text-align: center;
-    font-size: 18px;
     margin-top: 20px;
+    font-size: 18px;
     font-weight: bold;
+}
+
+.previous-data p, .result p {
+    font-size: 16px;
+    color: #333;
+}
+
+.error-message {
+    color: red;
+    background-color: #ffe6e6;
+    padding: 15px;
+    border-radius: 8px;
+    border: 1px solid red;
+    animation: shake 0.3s ease-out;
+}
+
+/* Fade In Animation */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+/* Shake Animation for error messages */
+@keyframes shake {
+    0% {
+        transform: translateX(-5px);
+    }
+    25% {
+        transform: translateX(5px);
+    }
+    50% {
+        transform: translateX(-5px);
+    }
+    75% {
+        transform: translateX(5px);
+    }
+    100% {
+        transform: translateX(0);
+    }
 }
 
 /* Responsive Design */
 @media (max-width: 768px) {
     .container {
-        width: 90%; /* Make the form width 90% of the screen on smaller devices */
-    }
-
-    h1 {
-        font-size: 20px;
-    }
-
-    input, select, button {
-        font-size: 16px; /* Make text and form elements larger on smaller screens */
+        width: 90%;
     }
 }
 
 @media (max-width: 480px) {
     h1 {
-        font-size: 18px; /* Adjust the title font size on very small screens */
-    }
-
-    .container {
-        padding: 10px; /* Reduce padding on smaller screens */
+        font-size: 24px;
     }
 
     input, select, button {
-        font-size: 14px; /* Further adjust text size on small screens */
+        font-size: 14px;
     }
 
     button {
-        padding: 12px; /* Increase button size for better usability on small screens */
+        padding: 12px;
     }
 }
