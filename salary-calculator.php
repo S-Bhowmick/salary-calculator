@@ -1,8 +1,22 @@
 <?php
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    $jobTitle = $_POST['jobTitle'];
-    $experience = $_POST['experience'];
+    // Check if job title, experience, and location are provided
+    if (empty($_POST['jobTitle']) || empty($_POST['experience']) || empty($_POST['location'])) {
+        $errorMessage = "Please fill in all fields.";
+        header("Location: index.html?error=" . urlencode($errorMessage));
+        exit;
+    }
+
+    // Sanitize and validate inputs
+    $jobTitle = htmlspecialchars($_POST['jobTitle']);
+    $experience = intval($_POST['experience']);
     $location = $_POST['location'];
+
+    if ($experience <= 0 || !is_numeric($experience)) {
+        $errorMessage = "Experience must be a positive number.";
+        header("Location: index.html?error=" . urlencode($errorMessage));
+        exit;
+    }
 
     // Example salary ranges (can be updated with real data or database)
     $salaries = [
@@ -33,45 +47,26 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $minSalary = $baseSalary[0] + ($experience * 1000); // Add £1000 per year of experience
         $maxSalary = $baseSalary[1] + ($experience * 1500); // Add £1500 per year of experience
 
-        // Calculate tax
-        function calculateTax($salary) {
-            $tax = 0;
+        // Calculate tax and NI (previously added code)
 
-            // Income tax bands for 2025-2026
-            if ($salary <= 12570) {
-                $tax = 0; // Personal allowance
-            } elseif ($salary <= 50270) {
-                $tax = ($salary - 12570) * 0.20; // Basic rate
-            } elseif ($salary <= 150000) {
-                $tax = (50270 - 12570) * 0.20 + ($salary - 50270) * 0.40; // Higher rate
-            } else {
-                $tax = (50270 - 12570) * 0.20 + (150000 - 50270) * 0.40 + ($salary - 150000) * 0.45; // Additional rate
-            }
-
-            // National Insurance (Class 1)
-            $NI = 0;
-            if ($salary > 12570) {
-                if ($salary <= 50270) {
-                    $NI = ($salary - 12570) * 0.12; // 12% between £12,570 and £50,270
-                } else {
-                    $NI = (50270 - 12570) * 0.12 + ($salary - 50270) * 0.02; // 2% over £50,270
-                }
-            }
-
-            return $tax + $NI;
-        }
-
-        // Calculate net salary
         $totalSalary = ($minSalary + $maxSalary) / 2;
         $taxAndNI = calculateTax($totalSalary);
         $netSalary = $totalSalary - $taxAndNI;
 
         $salaryMessage = "Estimated Salary Range: £" . number_format($minSalary) . " - £" . number_format($maxSalary) . "<br>";
         $salaryMessage .= "Estimated Net Salary (after tax and NI): £" . number_format($netSalary);
+    } else {
+        $errorMessage = "Salary data not available for the selected job title and location.";
+        header("Location: index.html?error=" . urlencode($errorMessage));
+        exit;
     }
 
-    // Redirect back to index.html with the salary message
-    header("Location: index.html?salary=" . urlencode($salaryMessage));
+    // Redirect back to index.html with the salary message or error message
+    if (isset($salaryMessage)) {
+        header("Location: index.html?salary=" . urlencode($salaryMessage));
+    } else {
+        header("Location: index.html?error=" . urlencode($errorMessage));
+    }
     exit;
 }
 ?>
