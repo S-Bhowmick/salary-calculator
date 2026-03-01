@@ -32,5 +32,33 @@
             </div>
         <?php endif; ?>
     </div>
+    <script>
+    document.querySelector('form').addEventListener('submit', function(e) {
+        let jobTitle = document.getElementById('jobTitle').value;
+        let experience = document.getElementById('experience').value;
+        let location = document.getElementById('location').value;
+        
+        // Validate job title
+        if (jobTitle.trim() === "") {
+            alert("Job Title cannot be empty.");
+            e.preventDefault();  // Prevent form submission
+            return;
+        }
+        
+        // Validate experience (must be a positive integer)
+        if (experience <= 0 || isNaN(experience)) {
+            alert("Please enter a valid positive number for experience.");
+            e.preventDefault();  // Prevent form submission
+            return;
+        }
+
+        // Validate location (must be selected)
+        if (location === "") {
+            alert("Please select a location.");
+            e.preventDefault();  // Prevent form submission
+            return;
+        }
+    });
+</script>
 </body>
 </html>
