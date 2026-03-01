@@ -33,7 +33,41 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $minSalary = $baseSalary[0] + ($experience * 1000); // Add £1000 per year of experience
         $maxSalary = $baseSalary[1] + ($experience * 1500); // Add £1500 per year of experience
 
-        $salaryMessage = "Estimated Salary Range: £" . $minSalary . " - £" . $maxSalary;
+        // Calculate tax
+        function calculateTax($salary) {
+            $tax = 0;
+
+            // Income tax bands for 2025-2026
+            if ($salary <= 12570) {
+                $tax = 0; // Personal allowance
+            } elseif ($salary <= 50270) {
+                $tax = ($salary - 12570) * 0.20; // Basic rate
+            } elseif ($salary <= 150000) {
+                $tax = (50270 - 12570) * 0.20 + ($salary - 50270) * 0.40; // Higher rate
+            } else {
+                $tax = (50270 - 12570) * 0.20 + (150000 - 50270) * 0.40 + ($salary - 150000) * 0.45; // Additional rate
+            }
+
+            // National Insurance (Class 1)
+            $NI = 0;
+            if ($salary > 12570) {
+                if ($salary <= 50270) {
+                    $NI = ($salary - 12570) * 0.12; // 12% between £12,570 and £50,270
+                } else {
+                    $NI = (50270 - 12570) * 0.12 + ($salary - 50270) * 0.02; // 2% over £50,270
+                }
+            }
+
+            return $tax + $NI;
+        }
+
+        // Calculate net salary
+        $totalSalary = ($minSalary + $maxSalary) / 2;
+        $taxAndNI = calculateTax($totalSalary);
+        $netSalary = $totalSalary - $taxAndNI;
+
+        $salaryMessage = "Estimated Salary Range: £" . number_format($minSalary) . " - £" . number_format($maxSalary) . "<br>";
+        $salaryMessage .= "Estimated Net Salary (after tax and NI): £" . number_format($netSalary);
     }
 
     // Redirect back to index.html with the salary message
