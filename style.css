@@ -5,6 +5,50 @@ body {
     padding: 0;
 }
 
+/* Navigation Bar Styles */
+.navbar {
+    position: sticky; /* Makes the navbar stick to the top */
+    top: 0; /* Sticks it to the top of the page */
+    background-color: #333; /* Dark background */
+    padding: 10px 0;
+    z-index: 1000; /* Ensure it stays on top of other content */
+}
+
+.navbar-container {
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    justify-content: space-between; /* Space between logo and links */
+    align-items: center;
+}
+
+.navbar .logo {
+    font-family: 'Poppins', sans-serif;
+    color: #fff;
+    font-size: 24px;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+.nav-links {
+    list-style: none;
+    display: flex;
+    gap: 20px; /* Space between the links */
+}
+
+.nav-links li a {
+    text-decoration: none;
+    color: #fff; /* White text color */
+    font-size: 16px;
+    font-weight: 500;
+}
+
+.nav-links li a:hover {
+    color: #28a745; /* Change color on hover */
+}
+
+/* Form Layout */
 .container {
     width: 100%;
     max-width: 600px;
@@ -167,6 +211,10 @@ button:focus {
     input, select, button {
         font-size: 14px; /* Smaller font size on small screens */
     }
+
+    .nav-links {
+        gap: 10px; /* Space between links on smaller screens */
+    }
 }
 
 /* Mobile-first design for very small devices */
@@ -182,5 +230,16 @@ button:focus {
 
     button {
         padding: 14px; /* Larger padding for buttons */
+    }
+
+    .navbar-container {
+        flex-direction: column; /* Stack navbar items vertically on mobile */
+        align-items: center;
+    }
+
+    .nav-links {
+        flex-direction: column; /* Stack links vertically */
+        gap: 15px; /* More space between links */
+        margin-top: 10px;
     }
 }
