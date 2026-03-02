@@ -6,20 +6,31 @@
     <title>User Registration</title>
     <link rel="stylesheet" href="style.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500&family=Roboto:wght@400;500&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
+
 </head>
 <body>
     <h2>User Registration</h2>
     <form action="http://localhost:8888/Salary-Calculator/register.php" method="POST">
-        <label for="username">Username:</label>
+    <label for="username">Username:</label>
+    <div class="input-container">
+        <i class="fas fa-user"></i> <!-- Font Awesome user icon -->
         <input type="text" id="username" name="username" required>
+    </div>
 
-        <label for="email">Email:</label>
+    <label for="email">Email:</label>
+    <div class="input-container">
+        <i class="fas fa-envelope"></i> <!-- Font Awesome email icon -->
         <input type="email" id="email" name="email" required>
+    </div>
 
-        <label for="password">Password:</label>
+    <label for="password">Password:</label>
+    <div class="input-container">
+        <i class="fas fa-lock"></i> <!-- Font Awesome lock icon -->
         <input type="password" id="password" name="password" required>
+    </div>
 
-        <button type="submit">Register</button>
+    <button type="submit"><i class="fas fa-user-plus"></i> Register</button> <!-- Icon in button -->
     </form>
 </body>
 </html>
