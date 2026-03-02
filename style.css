@@ -57,12 +57,32 @@ input, select, button {
     border: 1px solid #ccc;
 }
 
+/* Icons inside the input fields */
+.input-container {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.input-container i {
+    position: absolute;
+    left: 12px;
+    font-size: 18px;
+    color: #777;
+}
+
+input {
+    padding-left: 35px;  /* Add padding for the icon inside the input */
+}
+
+/* Focus state for input fields */
 input:focus {
     outline: none;
     border-color: #007BFF; /* Blue border on focus */
     box-shadow: 0px 0px 5px rgba(0, 123, 255, 0.5); /* Blue glow effect */
 }
 
+/* Button hover effect */
 button:hover {
     background-color: #218838; /* Darker green when hovered */
 }
@@ -71,6 +91,7 @@ button:focus {
     outline: none;
 }
 
+/* Result, success, and error messages */
 .result, .previous-data, .error-message {
     text-align: center;
     margin-top: 20px;
