@@ -1,5 +1,5 @@
 body {
-    font-family: 'Roboto', sans-serif;
+    font-family: 'Roboto', sans-serif; /* Use Roboto for the body */
     background-color: #f4f7fa; /* Light gray background */
     margin: 0;
     padding: 0;
@@ -17,7 +17,7 @@ body {
 }
 
 h1 {
-    font-family: 'Poppins', sans-serif; /* Use Poppins for headings */
+    font-family: 'Poppins', sans-serif; /* Poppins font for headings */
     text-align: center;
     font-size: 28px;
     margin-bottom: 20px;
@@ -25,7 +25,7 @@ h1 {
 }
 
 button {
-    font-family: 'Poppins', sans-serif; /* Use Poppins for buttons */
+    font-family: 'Poppins', sans-serif; /* Poppins for buttons */
     background-color: #28a745;
     color: white;
     cursor: pointer;
@@ -34,8 +34,11 @@ button {
     width: 100%;
     margin-top: 10px;
     font-size: 16px;
+    padding: 12px;
+    border-radius: 8px;
 }
 
+/* Form Layout */
 form {
     display: flex;
     flex-direction: column;
@@ -130,23 +133,33 @@ button:focus {
     }
 }
 
-/* Responsive Design */
+/* Responsive Design for larger tablets and small devices */
 @media (max-width: 768px) {
     .container {
         width: 90%;
     }
-}
 
-@media (max-width: 480px) {
     h1 {
-        font-size: 24px;
+        font-size: 24px; /* Smaller heading on smaller screens */
     }
 
     input, select, button {
-        font-size: 14px;
+        font-size: 14px; /* Smaller font size on small screens */
+    }
+}
+
+/* Mobile-first design for very small devices */
+@media (max-width: 480px) {
+    .container {
+        width: 95%; /* Full width on very small screens */
+        padding: 15px; /* Less padding for smaller screens */
+    }
+
+    h1 {
+        font-size: 22px; /* Even smaller heading */
     }
 
     button {
-        padding: 12px;
+        padding: 14px; /* Larger padding for buttons */
     }
 }
