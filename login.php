@@ -22,9 +22,14 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $user = $result->fetch_assoc();
     // Verify the password
     if (password_verify($password, $user['password'])) {
-        $_SESSION['userID'] = $user['id'];
-        $_SESSION['username'] = $user['username'];
-        header("Location: dashboard.php"); // Redirect to a dashboard page after successful login
+        // Store user data in session
+        $_SESSION['user'] = [
+            'username' => $user['username'],
+            'email' => $user['email'],
+            'id' => $user['id']
+        ];
+        
+        header("Location: dashboard.php"); // Redirect to dashboard page after successful login
     } else {
         $_SESSION['error'] = "Incorrect password!";
         header("Location: login.html");
