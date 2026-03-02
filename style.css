@@ -1,5 +1,5 @@
 body {
-    font-family: 'Arial', sans-serif;
+    font-family: 'Roboto', sans-serif;
     background-color: #f4f7fa; /* Light gray background */
     margin: 0;
     padding: 0;
@@ -17,10 +17,23 @@ body {
 }
 
 h1 {
+    font-family: 'Poppins', sans-serif; /* Use Poppins for headings */
     text-align: center;
     font-size: 28px;
     margin-bottom: 20px;
     color: #333;
+}
+
+button {
+    font-family: 'Poppins', sans-serif; /* Use Poppins for buttons */
+    background-color: #28a745;
+    color: white;
+    cursor: pointer;
+    border: none;
+    transition: background-color 0.3s ease;
+    width: 100%;
+    margin-top: 10px;
+    font-size: 16px;
 }
 
 form {
@@ -45,17 +58,6 @@ input:focus {
     outline: none;
     border-color: #007BFF; /* Blue border on focus */
     box-shadow: 0px 0px 5px rgba(0, 123, 255, 0.5); /* Blue glow effect */
-}
-
-button {
-    background-color: #28a745; /* Green background */
-    color: white;
-    cursor: pointer;
-    border: none;
-    transition: background-color 0.3s ease;
-    width: 100%; /* Make the button span the full width */
-    margin-top: 10px;
-    font-size: 16px;
 }
 
 button:hover {
