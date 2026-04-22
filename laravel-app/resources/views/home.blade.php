@@ -28,9 +28,14 @@
 
     <div class="container">
         <h1>UK Salary Calculator</h1>
-        <form action="salary-calculator.php" method="POST">
-            <label for="jobTitle">Job Title</label>
-            <input type="text" id="jobTitle" name="jobTitle" placeholder="e.g., Software Developer" required>
+        <form action="{{ route('calculate.salary') }}" method="POST">
+            @csrf
+           <label for="jobTitle">Job Title</label>
+            <select id="jobTitle" name="jobTitle" required>
+                <option value="Software Developer">Software Developer</option>
+                <option value="Data Analyst">Data Analyst</option>
+                <option value="Project Manager">Project Manager</option>
+            </select>
 
             <label for="experience">Experience (Years)</label>
             <input type="number" id="experience" name="experience" required>
@@ -45,6 +50,17 @@
             <button type="submit">Calculate Salary</button>
         </form>
 
+        @if(session('salary'))
+    <div class="result">
+        <h2>Estimated Salary: £{{ session('salary') }}</h2>
+    </div>
+    @endif
+
+    @if(session('error'))
+    <div style="color:red;">
+        {{ session('error') }}
+    </div>
+    @endif
         <!-- Display Salary Results if any -->
         <?php if (isset($_GET['salary'])): ?>
             <div class="result">
