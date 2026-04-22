@@ -1,0 +1,85 @@
+<?php session_start(); ?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UK Salary Calculator</title>
+    <link rel="stylesheet" href="{{ asset('css/style.css') }}">
+</head>
+<body>
+    <!-- Display Previous Calculation from Session -->
+    <?php if (isset($_SESSION['userData'])): ?>
+        <div class="previous-data">
+            <h3>Your Previous Calculation</h3>
+            <p><strong>Job Title:</strong> <?php echo htmlspecialchars($_SESSION['userData']['jobTitle']); ?></p>
+            <p><strong>Experience:</strong> <?php echo htmlspecialchars($_SESSION['userData']['experience']); ?> years</p>
+            <p><strong>Location:</strong> <?php echo htmlspecialchars($_SESSION['userData']['location']); ?></p>
+            <p><strong>Salary Estimate:</strong> <?php echo $_SESSION['userData']['salaryMessage']; ?></p>
+        </div>
+    <?php endif; ?>
+
+    <!-- Display Error Message if any -->
+    <?php if (isset($_GET['error'])): ?>
+        <div class="error-message">
+            <p style="color: red;"><?php echo htmlspecialchars($_GET['error']); ?></p>
+        </div>
+    <?php endif; ?>
+
+    <div class="container">
+        <h1>UK Salary Calculator</h1>
+        <form action="salary-calculator.php" method="POST">
+            <label for="jobTitle">Job Title</label>
+            <input type="text" id="jobTitle" name="jobTitle" placeholder="e.g., Software Developer" required>
+
+            <label for="experience">Experience (Years)</label>
+            <input type="number" id="experience" name="experience" required>
+
+            <label for="location">Location</label>
+            <select id="location" name="location" required>
+                <option value="London">London</option>
+                <option value="Manchester">Manchester</option>
+                <option value="Birmingham">Birmingham</option>
+            </select>
+
+            <button type="submit">Calculate Salary</button>
+        </form>
+
+        <!-- Display Salary Results if any -->
+        <?php if (isset($_GET['salary'])): ?>
+            <div class="result">
+                <h2>Estimated Salary: £<?php echo htmlspecialchars($_GET['salary']); ?></h2>
+            </div>
+        <?php endif; ?>
+    </div>
+
+    <script>
+    document.querySelector('form').addEventListener('submit', function(e) {
+        let jobTitle = document.getElementById('jobTitle').value;
+        let experience = document.getElementById('experience').value;
+        let location = document.getElementById('location').value;
+        
+        // Validate job title
+        if (jobTitle.trim() === "") {
+            alert("Job Title cannot be empty.");
+            e.preventDefault();  // Prevent form submission
+            return;
+        }
+        
+        // Validate experience (must be a positive integer)
+        if (experience <= 0 || isNaN(experience)) {
+            alert("Please enter a valid positive number for experience.");
+            e.preventDefault();  // Prevent form submission
+            return;
+        }
+
+        // Validate location (must be selected)
+        if (location === "") {
+            alert("Please select a location.");
+            e.preventDefault();  // Prevent form submission
+            return;
+        }
+    });
+    </script>
+</body>
+</html>
