@@ -18,6 +18,9 @@
                 <form action="{{ route('logout') }}" method="POST" style="display:inline;">
                     @csrf
                     <button type="submit" class="logout-btn">Logout</button>
+                    @if(Auth::user()->is_admin)
+                        <a href="{{ route('admin.panel') }}" class="nav-btn">Admin Panel</a>
+                    @endif
                 </form>
             </div>
         </div>

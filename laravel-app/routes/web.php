@@ -1,9 +1,10 @@
 <?php
 
-use App\Http\Controllers\ProfileController;
+use App\Models\User;
 use App\Models\SalaryCalculation;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\ProfileController;
 
 // Redirect root to login if not logged in, otherwise show calculator
 Route::get('/', function () {
@@ -56,13 +57,52 @@ Route::delete('/calculation/{id}', function ($id) {
 
     return redirect()->route('dashboard')->with('success', 'Calculation deleted successfully.');
 })->middleware('auth')->name('calculation.delete');
-// Dashboard
 
+// Dashboard
 Route::get('/dashboard', function () {
     $calculations = SalaryCalculation::where('user_id', auth()->id())->latest()->get();
 
     return view('dashboard', compact('calculations'));
 })->middleware(['auth'])->name('dashboard');
+
+// admin
+Route::get('/make-me-admin', function () {
+    $user = auth()->user();
+
+    if (!$user) {
+        return 'Please login first.';
+    }
+
+    $user->is_admin = true;
+    $user->save();
+
+    return 'You are now admin.';
+})->middleware('auth');
+
+Route::get('/admin', function () {
+    if (!auth()->user()->is_admin) {
+        abort(403, 'Unauthorized access');
+    }
+
+    $users = User::latest()->get();
+    $calculations = SalaryCalculation::latest()->get();
+    $totalUsers = User::count();
+    $totalCalculations = SalaryCalculation::count();
+
+    return view('admin', compact('users', 'calculations', 'totalUsers', 'totalCalculations'));
+})->middleware('auth')->name('admin.panel');
+
+// Delete Calculation
+Route::delete('/admin/calculation/{id}', function ($id) {
+    if (!auth()->user()->is_admin) {
+        abort(403, 'Unauthorized access');
+    }
+
+    $calculation = SalaryCalculation::findOrFail($id);
+    $calculation->delete();
+
+    return redirect()->route('admin.panel')->with('success', 'Calculation deleted by admin.');
+})->middleware('auth')->name('admin.calculation.delete');
 
 // Profile routes
 Route::middleware('auth')->group(function () {
