@@ -47,13 +47,22 @@ Route::post('/calculate', function (Request $request) {
     return redirect('/')->with('salary', $baseSalary);
 })->middleware('auth')->name('calculate.salary');
 
+Route::delete('/calculation/{id}', function ($id) {
+    $calculation = SalaryCalculation::where('id', $id)
+        ->where('user_id', auth()->id())
+        ->firstOrFail();
+
+    $calculation->delete();
+
+    return redirect()->route('dashboard')->with('success', 'Calculation deleted successfully.');
+})->middleware('auth')->name('calculation.delete');
 // Dashboard
 
 Route::get('/dashboard', function () {
     $calculations = SalaryCalculation::where('user_id', auth()->id())->latest()->get();
 
     return view('dashboard', compact('calculations'));
-})->middleware(['auth', 'verified'])->name('dashboard');
+})->middleware(['auth'])->name('dashboard');
 
 // Profile routes
 Route::middleware('auth')->group(function () {

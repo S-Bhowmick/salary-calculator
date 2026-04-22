@@ -1,276 +1,207 @@
-/* ---------- Base / Reset ---------- */
 * {
+    margin: 0;
+    padding: 0;
     box-sizing: border-box;
 }
 
 body {
-    font-family: 'Roboto', sans-serif;
-    margin: 0;
-    padding: 0;
-
-    /* More premium background */
-    background: radial-gradient(circle at top, #eef5ff 0%, #f7f9fc 35%, #f4f7fa 100%);
-    color: #1f2937;
+    font-family: 'Poppins', sans-serif;
+    background: linear-gradient(135deg, #eef2ff, #f8fafc);
+    color: #1e293b;
+    min-height: 100vh;
 }
 
-/* ---------- Navbar ---------- */
+/* Navbar */
 .navbar {
-    position: sticky;
-    top: 0;
-    z-index: 1000;
-
-    background: rgba(17, 24, 39, 0.92);
-    backdrop-filter: blur(8px);
-    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    background: #0f172a;
+    color: white;
+    padding: 16px 40px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
 }
 
 .navbar-container {
-    width: 100%;
-    max-width: 1100px;
-    margin: 0 auto;
-    padding: 12px 16px;
+    max-width: 1200px;
+    margin: auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
 
+.logo {
+    font-size: 24px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+}
+
+.nav-right {
     display: flex;
     align-items: center;
-    justify-content: space-between;
+    gap: 12px;
 }
 
-.navbar .logo {
-    font-family: 'Poppins', sans-serif;
-    color: #ffffff;
-    text-decoration: none;
-    font-weight: 700;
-    letter-spacing: 0.3px;
-    font-size: 20px;
-}
-
-.nav-links {
-    list-style: none;
-    display: flex;
-    gap: 18px;
-    margin: 0;
-    padding: 0;
-}
-
-.nav-links a {
-    text-decoration: none;
-    color: rgba(255, 255, 255, 0.85);
-    font-weight: 500;
+.welcome-text {
     font-size: 14px;
-    padding: 8px 10px;
+    color: #cbd5e1;
+}
+
+.nav-btn,
+.logout-btn {
+    text-decoration: none;
+    background: #1d4ed8;
+    color: white;
+    border: none;
+    padding: 10px 16px;
     border-radius: 10px;
-    transition: 0.2s ease;
+    cursor: pointer;
+    font-size: 14px;
+    transition: 0.3s ease;
 }
 
-.nav-links a:hover {
-    color: #ffffff;
-    background: rgba(255, 255, 255, 0.08);
+.nav-btn:hover,
+.logout-btn:hover {
+    background: #2563eb;
 }
 
-/* ---------- Layout Container / Card ---------- */
-.container {
-    width: 100%;
-    max-width: 650px;
-    margin: 42px auto;
-    padding: 26px;
-
-    background: rgba(255, 255, 255, 0.92);
-    border: 1px solid rgba(15, 23, 42, 0.08);
-    border-radius: 16px;
-    box-shadow: 0 12px 32px rgba(2, 6, 23, 0.08);
-
-    animation: fadeIn 0.35s ease-out;
+/* Hero */
+.hero {
+    text-align: center;
+    padding: 50px 20px 20px;
 }
 
-h1, h2 {
-    font-family: 'Poppins', sans-serif;
-    margin: 0 0 10px 0;
+.hero-content h1 {
+    font-size: 42px;
+    margin-bottom: 10px;
     color: #0f172a;
 }
 
-h1 {
-    text-align: center;
-    font-size: 28px;
-    letter-spacing: 0.2px;
-}
-
-.subtitle {
-    text-align: center;
-    margin: 0 0 18px 0;
+.hero-content p {
     color: #475569;
-    font-size: 14px;
+    font-size: 16px;
 }
 
-/* ---------- Form ---------- */
-form {
+/* Main Layout */
+.main-container {
     display: flex;
-    flex-direction: column;
-    gap: 14px;
-    margin-top: 10px;
+    justify-content: center;
+    padding: 30px 20px 60px;
+}
+
+.card {
+    width: 100%;
+    max-width: 700px;
+    background: white;
+    border-radius: 24px;
+    padding: 35px;
+    box-shadow: 0 20px 50px rgba(15, 23, 42, 0.10);
+    border: 1px solid #e2e8f0;
+}
+
+.calculator-card h2 {
+    font-size: 28px;
+    margin-bottom: 25px;
+    color: #0f172a;
+    text-align: center;
 }
 
 label {
-    font-size: 14px;
-    color: #334155;
-    font-weight: 500;
-}
-
-/* Input with icon wrapper */
-.input-container {
-    position: relative;
-    display: flex;
-    align-items: center;
-}
-
-.input-container i {
-    position: absolute;
-    left: 12px;
-    font-size: 16px;
-    color: #64748b;
-}
-
-input, select {
-    width: 100%;
-    padding: 12px 12px 12px 38px; /* space for icon */
-    font-size: 14px;
-
-    border-radius: 12px;
-    border: 1px solid rgba(100, 116, 139, 0.35);
-    background: rgba(248, 250, 252, 0.9);
-
-    transition: 0.2s ease;
-}
-
-select {
-    padding-left: 12px; /* select usually has no icon */
-}
-
-input:focus, select:focus {
-    outline: none;
-    border-color: rgba(37, 99, 235, 0.75);
-    box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.15);
-    background: #ffffff;
-}
-
-/* ---------- Buttons ---------- */
-button {
-    width: 100%;
-    margin-top: 6px;
-
-    font-family: 'Poppins', sans-serif;
-    font-size: 15px;
+    display: block;
+    margin-bottom: 8px;
+    margin-top: 18px;
     font-weight: 600;
-
-    padding: 12px 14px;
-    border: none;
-    border-radius: 12px;
-
-    color: #ffffff;
-    cursor: pointer;
-
-    /* more premium button */
-    background: linear-gradient(135deg, #22c55e 0%, #16a34a 55%, #15803d 100%);
-    box-shadow: 0 10px 18px rgba(34, 197, 94, 0.18);
-
-    transition: transform 0.12s ease, filter 0.2s ease;
-}
-
-button:hover {
-    filter: brightness(1.03);
-    transform: translateY(-1px);
-}
-
-button:active {
-    transform: translateY(0px);
-}
-
-/* Icon inside button */
-button i {
-    margin-right: 8px;
-}
-
-/* ---------- Alerts (success/error) ---------- */
-.alert {
-    margin-top: 14px;
-    padding: 12px 14px;
-    border-radius: 12px;
-    font-size: 14px;
-    line-height: 1.35;
-    border: 1px solid transparent;
-}
-
-.alert-success {
-    background: rgba(34, 197, 94, 0.10);
-    border-color: rgba(34, 197, 94, 0.25);
-    color: #166534;
-}
-
-.alert-error {
-    background: rgba(239, 68, 68, 0.10);
-    border-color: rgba(239, 68, 68, 0.25);
-    color: #7f1d1d;
-    animation: shake 0.25s ease-out;
-}
-
-/* ---------- Result / Previous Data ---------- */
-.result, .previous-data {
-    margin-top: 16px;
-    padding: 14px;
-    border-radius: 14px;
-    border: 1px solid rgba(15, 23, 42, 0.08);
-    background: rgba(248, 250, 252, 0.85);
-}
-
-.previous-data h3 {
-    margin: 0 0 10px 0;
-    font-family: 'Poppins', sans-serif;
-    font-size: 16px;
-}
-
-.previous-data p, .result p {
-    margin: 6px 0;
-    font-size: 14px;
     color: #334155;
 }
 
-/* ---------- Animations ---------- */
-@keyframes fadeIn {
-    from { opacity: 0; transform: translateY(6px); }
-    to   { opacity: 1; transform: translateY(0); }
+input,
+select {
+    width: 100%;
+    padding: 14px 16px;
+    border: 1px solid #cbd5e1;
+    border-radius: 14px;
+    font-size: 15px;
+    background: #f8fafc;
+    transition: all 0.25s ease;
 }
 
-@keyframes shake {
-    0% { transform: translateX(-4px); }
-    25% { transform: translateX(4px); }
-    50% { transform: translateX(-3px); }
-    75% { transform: translateX(3px); }
-    100% { transform: translateX(0); }
+input:focus,
+select:focus {
+    outline: none;
+    border-color: #2563eb;
+    box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.12);
+    background: white;
 }
 
-/* ---------- Responsive ---------- */
+.calculate-btn {
+    width: 100%;
+    margin-top: 28px;
+    background: linear-gradient(135deg, #22c55e, #16a34a);
+    color: white;
+    border: none;
+    padding: 16px;
+    border-radius: 16px;
+    font-size: 18px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: 0.25s ease;
+    box-shadow: 0 12px 24px rgba(34, 197, 94, 0.2);
+}
+
+.calculate-btn:hover {
+    transform: translateY(-2px);
+    opacity: 0.96;
+}
+
+/* Result */
+.result-box {
+    margin-top: 25px;
+    padding: 20px;
+    border-radius: 18px;
+    text-align: center;
+}
+
+.success-box {
+    background: #ecfdf5;
+    border: 1px solid #86efac;
+}
+
+.success-box h3 {
+    color: #166534;
+    margin-bottom: 8px;
+}
+
+.success-box p {
+    font-size: 32px;
+    font-weight: 700;
+    color: #14532d;
+}
+
+.error-box {
+    background: #fef2f2;
+    border: 1px solid #fca5a5;
+    color: #b91c1c;
+    font-weight: 600;
+}
+
+/* Responsive */
 @media (max-width: 768px) {
-    .container {
-        margin: 28px auto;
-        width: 92%;
-        padding: 18px;
+    .navbar {
+        padding: 16px 20px;
     }
-
-    h1 { font-size: 24px; }
 
     .navbar-container {
-        padding: 10px 12px;
         flex-direction: column;
-        gap: 10px;
+        gap: 12px;
+        align-items: flex-start;
     }
 
-    .nav-links {
-        gap: 10px;
-        flex-wrap: wrap;
-        justify-content: center;
+    .hero-content h1 {
+        font-size: 32px;
     }
-}
 
-@media (max-width: 480px) {
-    h1 { font-size: 22px; }
-    button { font-size: 14px; }
+    .card {
+        padding: 22px;
+    }
+
+    .success-box p {
+        font-size: 26px;
+    }
 }
