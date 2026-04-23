@@ -17,6 +17,7 @@
                 <span class="welcome-text">Welcome, {{ Auth::user()->name }}</span>
 
                 <a href="{{ route('dashboard') }}" class="nav-btn">Dashboard</a>
+                <a href="{{ route('faq') }}" class="nav-btn">FAQ</a>
 
                 @if(Auth::user()->is_admin)
                     <a href="{{ route('admin.panel') }}" class="nav-btn">Admin Panel</a>
@@ -38,8 +39,55 @@
     </section>
 
     <main class="main-container">
+        <div class="panel">
+            <div class="panel-title-row">
+                <div>
+                    <h2>Getting Started</h2>
+                    <p class="panel-subtext">A quick guide for first-time users to understand how this system works.</p>
+                </div>
+            </div>
+
+            <div class="onboarding-grid">
+                <div class="onboarding-card">
+                    <h3>1. Choose a Job Role</h3>
+                    <p>Select a role from the admin-managed job list. These roles are dynamic and can be updated by the admin panel.</p>
+                </div>
+
+                <div class="onboarding-card">
+                    <h3>2. Enter Experience</h3>
+                    <p>Your years of experience increase the salary based on the experience increment set for that role.</p>
+                </div>
+
+                <div class="onboarding-card">
+                    <h3>3. Select a Location</h3>
+                    <p>The chosen city adds a location bonus and also helps estimate monthly living affordability.</p>
+                </div>
+
+                <div class="onboarding-card">
+                    <h3>4. Add Monthly Planning</h3>
+                    <p>You can enter rent, food, transport, and other expenses to see your real remaining balance and savings potential.</p>
+                </div>
+            </div>
+        </div>
+
         <div class="calculator-card">
-            <h2>Calculate Your Salary</h2>
+            <div class="panel-title-row">
+                <div>
+                    <h2>Calculate Your Salary</h2>
+                    <p class="panel-subtext">Use the form below to estimate salary and monthly financial planning.</p>
+                </div>
+
+                <div class="top-actions">
+                    <button type="button" class="top-action-btn secondary" title="Salary is calculated using this formula: Base Salary + (Experience × Experience Increment) + Location Bonus">
+                        How salary is calculated
+                    </button>
+                </div>
+            </div>
+
+            <div class="info-tip">
+                <strong>Calculation Formula:</strong>
+                Base Salary + (Experience × Experience Increment) + Location Bonus
+            </div>
 
             <form action="{{ route('calculate.salary') }}" method="POST">
                 @csrf
@@ -51,9 +99,11 @@
                         <option value="{{ $role->role_name }}">{{ $role->role_name }}</option>
                     @endforeach
                 </select>
+                <p class="help-text">Choose the profession you want to evaluate. Job roles are managed from the admin panel.</p>
 
                 <label for="experience">Experience (Years)</label>
                 <input type="number" id="experience" name="experience" min="0" required>
+                <p class="help-text">More experience increases salary according to the role’s configured yearly increment.</p>
 
                 <label for="location">Location</label>
                 <select id="location" name="location" required>
@@ -62,6 +112,7 @@
                         <option value="{{ $location->location_name }}">{{ $location->location_name }}</option>
                     @endforeach
                 </select>
+                <p class="help-text">Different cities provide different location bonuses and living cost assumptions.</p>
 
                 <div style="margin-top:24px; padding:18px; border:1px solid rgba(255,255,255,0.08); border-radius:18px; background:rgba(255,255,255,0.02);">
                     <h3 style="font-size:20px; font-weight:700; margin-bottom:8px; color:var(--text-main);">Monthly Planning (Optional)</h3>
@@ -71,37 +122,52 @@
                         <div>
                             <label for="rent">Rent</label>
                             <input type="number" id="rent" name="rent" class="glass-input" min="0" placeholder="0">
+                            <p class="help-text">Enter your expected monthly rent or housing cost.</p>
                         </div>
 
                         <div>
                             <label for="food">Food</label>
                             <input type="number" id="food" name="food" class="glass-input" min="0" placeholder="0">
+                            <p class="help-text">Estimated monthly food and grocery cost.</p>
                         </div>
 
                         <div>
                             <label for="transport">Transport</label>
                             <input type="number" id="transport" name="transport" class="glass-input" min="0" placeholder="0">
+                            <p class="help-text">Monthly travel or commuting expense.</p>
                         </div>
 
                         <div>
                             <label for="bills">Bills</label>
                             <input type="number" id="bills" name="bills" class="glass-input" min="0" placeholder="0">
+                            <p class="help-text">Utility bills such as electricity, water, and internet.</p>
                         </div>
 
                         <div>
                             <label for="other">Other</label>
                             <input type="number" id="other" name="other" class="glass-input" min="0" placeholder="0">
+                            <p class="help-text">Any extra monthly spending you want to include.</p>
                         </div>
 
                         <div>
                             <label for="savings_goal">Savings Goal</label>
                             <input type="number" id="savings_goal" name="savings_goal" class="glass-input" min="0" placeholder="0">
+                            <p class="help-text">Target an amount and the system will estimate how many months it may take.</p>
                         </div>
                     </div>
                 </div>
 
                 <button type="submit" class="calculate-btn">Calculate Salary</button>
             </form>
+
+            <div class="sample-box">
+                <h3>Sample Calculation</h3>
+                <p><strong>Job Role:</strong> Software Developer</p>
+                <p><strong>Experience:</strong> 3 years</p>
+                <p><strong>Location:</strong> London</p>
+                <p><strong>Example Formula:</strong> Base Salary + (3 × Experience Increment) + Location Bonus</p>
+                <p>This helps new users understand how the system generates salary and take-home estimations.</p>
+            </div>
 
             @if(session('error'))
                 <div class="result-box error-box">

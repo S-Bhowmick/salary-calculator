@@ -311,4 +311,8 @@ Route::middleware(['auth', 'active'])->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
+Route::get('/faq', function () {
+    return view('faq');
+})->middleware(['auth', 'active'])->name('faq');
+
 require __DIR__.'/auth.php';
