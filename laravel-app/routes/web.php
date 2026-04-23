@@ -18,7 +18,7 @@ Route::get('/', function () {
     $locations = LocationBonus::where('is_active', true)->orderBy('location_name')->get();
 
     return view('home', compact('jobRoles', 'locations'));
-})->middleware(['auth', 'verified', 'active'])->name('home');
+})->middleware(['auth', 'active'])->name('home');
 
 Route::post('/calculate', function (CalculateSalaryRequest $request) {
     $jobRole = JobRole::where('role_name', $request->jobTitle)
@@ -118,13 +118,13 @@ Route::post('/calculate', function (CalculateSalaryRequest $request) {
         'savings_goal' => $savingsGoal,
         'months_to_goal' => $monthsToGoal,
     ]);
-})->middleware(['auth', 'verified', 'active'])->name('calculate.salary');
+})->middleware(['auth', 'active'])->name('calculate.salary');
 
 Route::get('/dashboard', function () {
     $calculations = SalaryCalculation::where('user_id', auth()->id())->latest()->get();
 
     return view('dashboard', compact('calculations'));
-})->middleware(['auth', 'verified', 'active'])->name('dashboard');
+})->middleware(['auth', 'active'])->name('dashboard');
 
 Route::delete('/calculation/{id}', function ($id) {
     $calculation = SalaryCalculation::where('id', $id)
@@ -134,7 +134,7 @@ Route::delete('/calculation/{id}', function ($id) {
     $calculation->delete();
 
     return redirect()->route('dashboard')->with('success', 'Calculation deleted successfully.');
-})->middleware(['auth', 'verified', 'active'])->name('calculation.delete');
+})->middleware(['auth', 'active'])->name('calculation.delete');
 
 Route::post('/favorite-calculation/{id}', function ($id) {
     $calculation = SalaryCalculation::where('id', $id)
@@ -145,7 +145,7 @@ Route::post('/favorite-calculation/{id}', function ($id) {
     $calculation->save();
 
     return redirect()->route('dashboard')->with('success', 'Favorite status updated successfully.');
-})->middleware(['auth', 'verified', 'active'])->name('calculation.favorite');
+})->middleware(['auth', 'active'])->name('calculation.favorite');
 
 Route::post('/compare-calculations', function (Request $request) {
     $selectedIds = $request->input('selected_calculations', []);
@@ -166,7 +166,7 @@ Route::post('/compare-calculations', function (Request $request) {
         ->pluck('estimated_monthly_cost', 'location_name');
 
     return view('compare', compact('comparisons', 'locationCosts'));
-})->middleware(['auth', 'verified', 'active'])->name('calculations.compare');
+})->middleware(['auth', 'active'])->name('calculations.compare');
 
 Route::get('/download-report', function () {
     $calculations = SalaryCalculation::where('user_id', auth()->id())->latest()->get();
@@ -175,7 +175,7 @@ Route::get('/download-report', function () {
     $pdf = Pdf::loadView('report-pdf', compact('calculations', 'user'));
 
     return $pdf->download('uk-salary-report-' . now()->format('Y-m-d') . '.pdf');
-})->middleware(['auth', 'verified', 'active'])->name('report.download');
+})->middleware(['auth', 'active'])->name('report.download');
 
 Route::get('/admin', function () {
     $users = User::withCount('salaryCalculations')->latest()->get();
@@ -234,7 +234,7 @@ Route::get('/admin', function () {
         'userStatusChartLabels',
         'userStatusChartData'
     ));
-})->middleware(['auth', 'verified', 'active', 'admin'])->name('admin.panel');
+})->middleware(['auth', 'active', 'admin'])->name('admin.panel');
 
 Route::post('/admin/job-role/add', function (StoreJobRoleRequest $request) {
     JobRole::create([
@@ -245,7 +245,7 @@ Route::post('/admin/job-role/add', function (StoreJobRoleRequest $request) {
     ]);
 
     return redirect()->route('admin.panel')->with('success', 'Job role added successfully.');
-})->middleware(['auth', 'verified', 'active', 'admin'])->name('admin.jobrole.add');
+})->middleware(['auth', 'active', 'admin'])->name('admin.jobrole.add');
 
 Route::post('/admin/location/add', function (StoreLocationBonusRequest $request) {
     LocationBonus::create([
@@ -256,7 +256,7 @@ Route::post('/admin/location/add', function (StoreLocationBonusRequest $request)
     ]);
 
     return redirect()->route('admin.panel')->with('success', 'Location bonus added successfully.');
-})->middleware(['auth', 'verified', 'active', 'admin'])->name('admin.location.add');
+})->middleware(['auth', 'active', 'admin'])->name('admin.location.add');
 
 Route::patch('/admin/user/{id}/toggle-active', function ($id) {
     $user = User::findOrFail($id);
@@ -269,7 +269,7 @@ Route::patch('/admin/user/{id}/toggle-active', function ($id) {
     $user->save();
 
     return redirect()->route('admin.panel')->with('success', 'User status updated successfully.');
-})->middleware(['auth', 'verified', 'active', 'admin'])->name('admin.user.toggle');
+})->middleware(['auth', 'active', 'admin'])->name('admin.user.toggle');
 
 Route::patch('/admin/user/{id}/promote', function ($id) {
     $user = User::findOrFail($id);
@@ -280,7 +280,7 @@ Route::patch('/admin/user/{id}/promote', function ($id) {
     }
 
     return redirect()->route('admin.panel')->with('success', 'User promoted to admin successfully.');
-})->middleware(['auth', 'verified', 'active', 'admin'])->name('admin.user.promote');
+})->middleware(['auth', 'active', 'admin'])->name('admin.user.promote');
 
 Route::patch('/admin/job-role/{id}/toggle-active', function ($id) {
     $role = JobRole::findOrFail($id);
@@ -288,7 +288,7 @@ Route::patch('/admin/job-role/{id}/toggle-active', function ($id) {
     $role->save();
 
     return redirect()->route('admin.panel')->with('success', 'Job role status updated successfully.');
-})->middleware(['auth', 'verified', 'active', 'admin'])->name('admin.role.toggle');
+})->middleware(['auth', 'active', 'admin'])->name('admin.role.toggle');
 
 Route::patch('/admin/location/{id}/toggle-active', function ($id) {
     $location = LocationBonus::findOrFail($id);
@@ -296,16 +296,16 @@ Route::patch('/admin/location/{id}/toggle-active', function ($id) {
     $location->save();
 
     return redirect()->route('admin.panel')->with('success', 'Location status updated successfully.');
-})->middleware(['auth', 'verified', 'active', 'admin'])->name('admin.location.toggle');
+})->middleware(['auth', 'active', 'admin'])->name('admin.location.toggle');
 
 Route::delete('/admin/calculation/{id}', function ($id) {
     $calculation = SalaryCalculation::findOrFail($id);
     $calculation->delete();
 
     return redirect()->route('admin.panel')->with('success', 'Calculation deleted by admin.');
-})->middleware(['auth', 'verified', 'active', 'admin'])->name('admin.calculation.delete');
+})->middleware(['auth', 'active', 'admin'])->name('admin.calculation.delete');
 
-Route::middleware(['auth', 'verified', 'active'])->group(function () {
+Route::middleware(['auth', 'active'])->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
