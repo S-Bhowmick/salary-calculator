@@ -22,6 +22,12 @@ Route::post('/calculate', function (Request $request) {
         'jobTitle' => 'required',
         'experience' => 'required|integer|min:0',
         'location' => 'required',
+        'rent' => 'nullable|numeric|min:0',
+        'food' => 'nullable|numeric|min:0',
+        'transport' => 'nullable|numeric|min:0',
+        'bills' => 'nullable|numeric|min:0',
+        'other' => 'nullable|numeric|min:0',
+        'savings_goal' => 'nullable|numeric|min:0',
     ]);
 
     $jobRole = JobRole::where('role_name', $request->jobTitle)
@@ -48,13 +54,39 @@ Route::post('/calculate', function (Request $request) {
     $annualGrossSalary = $baseSalary + $experienceBonus + $locationBonusAmount;
     $monthlyGrossSalary = $annualGrossSalary / 12;
 
-    // Simple estimated deductions for demo purpose
     $estimatedTax = $annualGrossSalary * 0.20;
     $estimatedNationalInsurance = $annualGrossSalary * 0.08;
     $estimatedPension = $annualGrossSalary * 0.05;
 
     $annualNetSalary = $annualGrossSalary - $estimatedTax - $estimatedNationalInsurance - $estimatedPension;
     $estimatedNetMonthlySalary = $annualNetSalary / 12;
+
+    $cityEstimatedMonthlyCost = $locationBonus->estimated_monthly_cost ?? 0;
+    $cityRemainingBalance = $estimatedNetMonthlySalary - $cityEstimatedMonthlyCost;
+
+    $rent = (float) ($request->rent ?? 0);
+    $food = (float) ($request->food ?? 0);
+    $transport = (float) ($request->transport ?? 0);
+    $bills = (float) ($request->bills ?? 0);
+    $other = (float) ($request->other ?? 0);
+
+    $totalMonthlyExpenses = $rent + $food + $transport + $bills + $other;
+    $remainingBalance = $estimatedNetMonthlySalary - $totalMonthlyExpenses;
+
+    $savingsGoal = (float) ($request->savings_goal ?? 0);
+    $monthsToGoal = null;
+
+    if ($savingsGoal > 0 && $remainingBalance > 0) {
+        $monthsToGoal = ceil($savingsGoal / $remainingBalance);
+    }
+
+    if ($cityRemainingBalance >= 500) {
+        $affordabilityStatus = 'Comfortable';
+    } elseif ($cityRemainingBalance >= 0) {
+        $affordabilityStatus = 'Manageable';
+    } else {
+        $affordabilityStatus = 'Difficult';
+    }
 
     SalaryCalculation::create([
         'user_id' => auth()->id(),
@@ -65,6 +97,9 @@ Route::post('/calculate', function (Request $request) {
     ]);
 
     return redirect()->route('home')->with([
+        'selected_role' => $jobRole->role_name,
+        'selected_location' => $locationBonus->location_name,
+
         'base_salary' => $baseSalary,
         'experience_bonus' => $experienceBonus,
         'location_bonus' => $locationBonusAmount,
@@ -76,6 +111,21 @@ Route::post('/calculate', function (Request $request) {
         'estimated_national_insurance' => $estimatedNationalInsurance,
         'estimated_pension' => $estimatedPension,
         'estimated_net_monthly_salary' => $estimatedNetMonthlySalary,
+
+        'city_estimated_monthly_cost' => $cityEstimatedMonthlyCost,
+        'city_remaining_balance' => $cityRemainingBalance,
+        'affordability_status' => $affordabilityStatus,
+
+        'rent' => $rent,
+        'food' => $food,
+        'transport' => $transport,
+        'bills' => $bills,
+        'other' => $other,
+        'total_monthly_expenses' => $totalMonthlyExpenses,
+        'remaining_balance' => $remainingBalance,
+
+        'savings_goal' => $savingsGoal,
+        'months_to_goal' => $monthsToGoal,
     ]);
 })->middleware('auth')->name('calculate.salary');
 
@@ -121,7 +171,10 @@ Route::post('/compare-calculations', function (Request $request) {
         ->where('user_id', auth()->id())
         ->get();
 
-    return view('compare', compact('comparisons'));
+    $locationCosts = LocationBonus::whereIn('location_name', $comparisons->pluck('location')->unique())
+        ->pluck('estimated_monthly_cost', 'location_name');
+
+    return view('compare', compact('comparisons', 'locationCosts'));
 })->middleware('auth')->name('calculations.compare');
 
 Route::get('/download-report', function () {
@@ -227,11 +280,13 @@ Route::post('/admin/location/add', function (Request $request) {
     $request->validate([
         'location_name' => 'required|string|max:255',
         'bonus_amount' => 'required|integer|min:0',
+        'estimated_monthly_cost' => 'required|integer|min:0',
     ]);
 
     LocationBonus::create([
         'location_name' => $request->location_name,
         'bonus_amount' => $request->bonus_amount,
+        'estimated_monthly_cost' => $request->estimated_monthly_cost,
         'is_active' => true,
     ]);
 

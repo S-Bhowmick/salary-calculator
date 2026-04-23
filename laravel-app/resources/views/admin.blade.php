@@ -101,7 +101,7 @@
                 <h3 class="text-orange">{{ $totalActiveLocations }}</h3>
             </div>
         </div>
-        
+
         <div class="panel">
             <div class="panel-title-row">
                 <div>
@@ -282,6 +282,11 @@
                 </div>
 
                 <div>
+                    <label>Estimated Monthly Cost</label>
+                    <input type="number" name="estimated_monthly_cost" class="glass-input" min="0" required>
+                </div>
+
+                <div>
                     <button type="submit" class="form-submit-btn orange">Add Location Bonus</button>
                 </div>
             </form>
@@ -299,6 +304,7 @@
                             <th>ID</th>
                             <th>Location Name</th>
                             <th>Bonus Amount</th>
+                            <th>Est. Monthly Cost</th>
                             <th>Status</th>
                             <th>Action</th>
                         </tr>
@@ -309,6 +315,7 @@
                                 <td>{{ $location->id }}</td>
                                 <td>{{ $location->location_name }}</td>
                                 <td>£{{ $location->bonus_amount }}</td>
+                                <td>£{{ $location->estimated_monthly_cost }}</td>
                                 <td>
                                     <span class="status-pill {{ $location->is_active ? 'active' : 'inactive' }}">
                                         {{ $location->is_active ? 'Active' : 'Inactive' }}
@@ -326,7 +333,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="5">No location bonuses found.</td>
+                                <td colspan="6">No location bonuses found.</td>
                             </tr>
                         @endforelse
                     </tbody>
@@ -385,6 +392,7 @@
             <p>Project developed for the <strong>Web Design Course</strong></p>
         </footer>
     </div>
+
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
         const jobRoleLabels = @json($jobRoleChartData->pluck('job_title'));

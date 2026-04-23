@@ -9,6 +9,7 @@ class LocationBonus extends Model
     protected $fillable = [
         'location_name',
         'bonus_amount',
+        'estimated_monthly_cost',
         'is_active',
     ];
 }
