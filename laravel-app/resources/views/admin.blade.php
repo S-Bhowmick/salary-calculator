@@ -104,6 +104,27 @@
 
         <div class="panel">
             <div class="panel-title-row">
+                <div>
+                    <h2>Admin Analytics Charts</h2>
+                    <p class="panel-subtext">Visual overview of job role popularity and user account status.</p>
+                </div>
+            </div>
+
+            <div class="chart-grid">
+                <div class="chart-card">
+                    <h3>Most Selected Job Roles</h3>
+                    <canvas id="jobRoleBarChart" height="140"></canvas>
+                </div>
+
+                <div class="chart-card">
+                    <h3>User Status Distribution</h3>
+                    <canvas id="userStatusPieChart" height="140"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <div class="panel">
+            <div class="panel-title-row">
                 <h2>All Users</h2>
                 <div class="top-actions">
                     <a href="{{ route('home') }}" class="top-action-btn">Back to Home</a>
@@ -142,7 +163,7 @@
                                             <form action="{{ route('admin.user.promote', $user->id) }}" method="POST" class="table-form">
                                                 @csrf
                                                 @method('PATCH')
-                                                <button type="submit" class="table-btn blue">Promote Admin</button>
+                                                <button type="submit" class="table-btn blue compact-btn">Promote Admin</button>
                                             </form>
                                         @endif
 
@@ -150,7 +171,7 @@
                                             <form action="{{ route('admin.user.toggle', $user->id) }}" method="POST" class="table-form">
                                                 @csrf
                                                 @method('PATCH')
-                                                <button type="submit" class="table-btn {{ $user->is_active ? 'red' : 'green' }}">
+                                                <button type="submit" class="table-btn {{ $user->is_active ? 'red' : 'green' }} compact-btn">
                                                     {{ $user->is_active ? 'Deactivate' : 'Activate' }}
                                                 </button>
                                             </form>
@@ -226,7 +247,7 @@
                                     <form action="{{ route('admin.role.toggle', $role->id) }}" method="POST" class="table-form">
                                         @csrf
                                         @method('PATCH')
-                                        <button type="submit" class="table-btn {{ $role->is_active ? 'red' : 'green' }}">
+                                        <button type="submit" class="table-btn {{ $role->is_active ? 'red' : 'green' }} compact-btn">
                                             {{ $role->is_active ? 'Deactivate' : 'Activate' }}
                                         </button>
                                     </form>
@@ -261,6 +282,11 @@
                 </div>
 
                 <div>
+                    <label>Estimated Monthly Cost</label>
+                    <input type="number" name="estimated_monthly_cost" class="glass-input" min="0" required>
+                </div>
+
+                <div>
                     <button type="submit" class="form-submit-btn orange">Add Location Bonus</button>
                 </div>
             </form>
@@ -278,6 +304,7 @@
                             <th>ID</th>
                             <th>Location Name</th>
                             <th>Bonus Amount</th>
+                            <th>Est. Monthly Cost</th>
                             <th>Status</th>
                             <th>Action</th>
                         </tr>
@@ -288,6 +315,7 @@
                                 <td>{{ $location->id }}</td>
                                 <td>{{ $location->location_name }}</td>
                                 <td>£{{ $location->bonus_amount }}</td>
+                                <td>£{{ $location->estimated_monthly_cost }}</td>
                                 <td>
                                     <span class="status-pill {{ $location->is_active ? 'active' : 'inactive' }}">
                                         {{ $location->is_active ? 'Active' : 'Inactive' }}
@@ -297,7 +325,7 @@
                                     <form action="{{ route('admin.location.toggle', $location->id) }}" method="POST" class="table-form">
                                         @csrf
                                         @method('PATCH')
-                                        <button type="submit" class="table-btn {{ $location->is_active ? 'red' : 'green' }}">
+                                        <button type="submit" class="table-btn {{ $location->is_active ? 'red' : 'green' }} compact-btn">
                                             {{ $location->is_active ? 'Deactivate' : 'Activate' }}
                                         </button>
                                     </form>
@@ -305,7 +333,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="5">No location bonuses found.</td>
+                                <td colspan="6">No location bonuses found.</td>
                             </tr>
                         @endforelse
                     </tbody>
@@ -342,7 +370,7 @@
                                     <form action="{{ route('admin.calculation.delete', $calc->id) }}" method="POST" class="table-form" onsubmit="return confirm('Delete this calculation?');">
                                         @csrf
                                         @method('DELETE')
-                                        <button type="submit" class="table-btn red">Delete</button>
+                                        <button type="submit" class="table-btn red compact-btn">Delete</button>
                                     </form>
                                 </td>
                             </tr>
@@ -364,6 +392,86 @@
             <p>Project developed for the <strong>Web Design Course</strong></p>
         </footer>
     </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        const jobRoleLabels = @json($jobRoleChartData->pluck('job_title'));
+        const jobRoleCounts = @json($jobRoleChartData->pluck('total'));
+
+        const userStatusLabels = @json($userStatusChartLabels);
+        const userStatusCounts = @json($userStatusChartData);
+
+        const jobRoleBarCtx = document.getElementById('jobRoleBarChart');
+        if (jobRoleBarCtx) {
+            new Chart(jobRoleBarCtx, {
+                type: 'bar',
+                data: {
+                    labels: jobRoleLabels,
+                    datasets: [{
+                        label: 'Selection Count',
+                        data: jobRoleCounts,
+                        backgroundColor: ['#9cff00', '#4ade80', '#22c55e', '#84cc16', '#bef264'],
+                        borderRadius: 8
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            labels: {
+                                color: '#f8fafc'
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            ticks: {
+                                color: '#b8c4be'
+                            },
+                            grid: {
+                                color: 'rgba(255,255,255,0.06)'
+                            }
+                        },
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                color: '#b8c4be'
+                            },
+                            grid: {
+                                color: 'rgba(255,255,255,0.06)'
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        const userStatusPieCtx = document.getElementById('userStatusPieChart');
+        if (userStatusPieCtx) {
+            new Chart(userStatusPieCtx, {
+                type: 'pie',
+                data: {
+                    labels: userStatusLabels,
+                    datasets: [{
+                        data: userStatusCounts,
+                        backgroundColor: ['#16a34a', '#dc2626'],
+                        borderColor: '#07110c',
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            labels: {
+                                color: '#f8fafc'
+                            }
+                        }
+                    }
+                }
+            });
+        }
+    </script>
 
 </body>
 </html>

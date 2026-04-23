@@ -30,11 +30,32 @@
         </div>
     </nav>
 
+    @php
+        $comparisonData = $comparisons->map(function ($comparison) use ($locationCosts) {
+            $annualGross = $comparison->calculated_salary;
+            $estimatedTax = $annualGross * 0.20;
+            $estimatedNationalInsurance = $annualGross * 0.08;
+            $estimatedPension = $annualGross * 0.05;
+            $estimatedNetMonthly = ($annualGross - $estimatedTax - $estimatedNationalInsurance - $estimatedPension) / 12;
+            $cityCost = $locationCosts[$comparison->location] ?? 0;
+            $remainingAfterCityCost = $estimatedNetMonthly - $cityCost;
+
+            return [
+                'model' => $comparison,
+                'net_monthly' => $estimatedNetMonthly,
+                'city_cost' => $cityCost,
+                'remaining_after_city_cost' => $remainingAfterCityCost,
+            ];
+        });
+
+        $bestRemaining = $comparisonData->max('remaining_after_city_cost');
+    @endphp
+
     <div class="page-shell">
         <div class="premium-header">
             <div class="premium-heading">
                 <h1>Salary Comparison</h1>
-                <p>Compare your selected salary records side by side to identify the best role, location, and expected earning path.</p>
+                <p>Compare gross salary, estimated net monthly income, city cost-of-living, and remaining balance to decide which option is better for real life.</p>
             </div>
 
             <div class="top-actions">
@@ -49,26 +70,26 @@
             </div>
 
             <div class="stat-card">
-                <p>Highest Compared Salary</p>
+                <p>Highest Gross Salary</p>
                 <h3 class="text-green">£{{ number_format($comparisons->max('calculated_salary') ?? 0, 2) }}</h3>
             </div>
 
             <div class="stat-card">
-                <p>Lowest Compared Salary</p>
-                <h3 class="text-orange">£{{ number_format($comparisons->min('calculated_salary') ?? 0, 2) }}</h3>
+                <p>Best Monthly Balance</p>
+                <h3 class="text-blue">£{{ number_format($bestRemaining ?? 0, 2) }}</h3>
             </div>
 
             <div class="stat-card">
-                <p>Average Compared Salary</p>
-                <h3 class="text-blue">£{{ number_format($comparisons->avg('calculated_salary') ?? 0, 2) }}</h3>
+                <p>Average Net Monthly</p>
+                <h3 class="text-orange">£{{ number_format($comparisonData->avg('net_monthly') ?? 0, 2) }}</h3>
             </div>
         </div>
 
         <div class="panel">
             <div class="panel-title-row">
                 <div>
-                    <h2>Side-by-Side Comparison</h2>
-                    <p class="panel-subtext">Review job title, experience, location, salary, and date in one premium comparison board.</p>
+                    <h2>Net Salary Comparison</h2>
+                    <p class="panel-subtext">Use this view to decide which job and city gives you the strongest real monthly outcome.</p>
                 </div>
             </div>
 
@@ -77,7 +98,7 @@
                     <thead>
                         <tr>
                             <th>Field</th>
-                            @foreach($comparisons as $comparison)
+                            @foreach($comparisonData as $item)
                                 <th>Record {{ $loop->iteration }}</th>
                             @endforeach
                         </tr>
@@ -85,49 +106,70 @@
                     <tbody>
                         <tr>
                             <td><strong>Job Title</strong></td>
-                            @foreach($comparisons as $comparison)
-                                <td>{{ $comparison->job_title }}</td>
+                            @foreach($comparisonData as $item)
+                                <td>{{ $item['model']->job_title }}</td>
                             @endforeach
                         </tr>
 
                         <tr>
                             <td><strong>Experience</strong></td>
-                            @foreach($comparisons as $comparison)
-                                <td>{{ $comparison->experience }} years</td>
+                            @foreach($comparisonData as $item)
+                                <td>{{ $item['model']->experience }} years</td>
                             @endforeach
                         </tr>
 
                         <tr>
                             <td><strong>Location</strong></td>
-                            @foreach($comparisons as $comparison)
-                                <td>{{ $comparison->location }}</td>
+                            @foreach($comparisonData as $item)
+                                <td>{{ $item['model']->location }}</td>
                             @endforeach
                         </tr>
 
                         <tr>
-                            <td><strong>Calculated Salary</strong></td>
-                            @foreach($comparisons as $comparison)
-                                <td class="text-green">£{{ number_format($comparison->calculated_salary, 2) }}</td>
+                            <td><strong>Annual Gross Salary</strong></td>
+                            @foreach($comparisonData as $item)
+                                <td class="text-green">£{{ number_format($item['model']->calculated_salary, 2) }}</td>
+                            @endforeach
+                        </tr>
+
+                        <tr>
+                            <td><strong>Estimated Net Monthly</strong></td>
+                            @foreach($comparisonData as $item)
+                                <td class="text-blue">£{{ number_format($item['net_monthly'], 2) }}</td>
+                            @endforeach
+                        </tr>
+
+                        <tr>
+                            <td><strong>City Monthly Cost</strong></td>
+                            @foreach($comparisonData as $item)
+                                <td>£{{ number_format($item['city_cost'], 2) }}</td>
+                            @endforeach
+                        </tr>
+
+                        <tr>
+                            <td><strong>Remaining After City Cost</strong></td>
+                            @foreach($comparisonData as $item)
+                                <td class="text-orange">£{{ number_format($item['remaining_after_city_cost'], 2) }}</td>
+                            @endforeach
+                        </tr>
+
+                        <tr>
+                            <td><strong>Better Option</strong></td>
+                            @foreach($comparisonData as $item)
+                                <td>
+                                    @if($item['remaining_after_city_cost'] == $bestRemaining)
+                                        <span class="status-pill active">Best Choice</span>
+                                    @else
+                                        <span class="status-pill inactive" style="background:#475569;">Standard</span>
+                                    @endif
+                                </td>
                             @endforeach
                         </tr>
 
                         <tr>
                             <td><strong>Date</strong></td>
-                            @foreach($comparisons as $comparison)
-                                <td>{{ $comparison->created_at->format('d M Y') }}</td>
-                            @endforeach
-                        </tr>
-
-                        <tr>
-                            <td><strong>Best Salary</strong></td>
-                            @foreach($comparisons as $comparison)
-                                <td>
-                                    @if($comparison->calculated_salary == $comparisons->max('calculated_salary'))
-                                        <span class="status-pill active">Top Option</span>
-                                    @else
-                                        <span class="status-pill inactive" style="background:#475569;">Standard</span>
-                                    @endif
-                                </td>
+                            @foreach($comparisonData as $item)
+                                <td>{{ $item['model']->created_at->format('d M Y') }}</td>
                             @endforeach
                         </tr>
                     </tbody>
