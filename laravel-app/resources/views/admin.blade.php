@@ -1,442 +1,369 @@
-<x-app-layout>
-    <div style="min-height: 100vh; background: linear-gradient(135deg, #eef2ff, #f8fafc); padding: 30px 20px 60px;">
-        <div style="max-width: 1200px; margin: 0 auto;">
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel</title>
+    <link rel="stylesheet" href="{{ asset('css/style.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
 
-            <div style="
-                background: white;
-                border-radius: 24px;
-                padding: 30px;
-                box-shadow: 0 20px 50px rgba(15, 23, 42, 0.10);
-                border: 1px solid #e2e8f0;
-                margin-bottom: 25px;
-            ">
-                <h1 style="font-size: 34px; font-weight: 700; color: #0f172a; margin-bottom: 8px;">
-                    Admin Panel
-                </h1>
-                <p style="color: #475569; font-size: 16px;">
-                    Welcome Admin, {{ Auth::user()->name }}. Manage users, salary rules, locations, and salary records here.
-                </p>
+    <nav class="navbar">
+        <div class="navbar-container">
+            <div class="logo">SalaryCalc Pro</div>
+
+            <div class="nav-right">
+                <span class="welcome-text">Welcome Admin, {{ Auth::user()->name }}</span>
+                <a href="{{ route('home') }}" class="nav-btn">Home</a>
+                <a href="{{ route('dashboard') }}" class="nav-btn">Dashboard</a>
+
+                <form action="{{ route('logout') }}" method="POST" class="inline-form">
+                    @csrf
+                    <button type="submit" class="logout-btn">Logout</button>
+                </form>
+            </div>
+        </div>
+    </nav>
+
+    <div class="page-shell">
+        <div class="premium-header">
+            <div class="premium-heading">
+                <h1>Admin Panel</h1>
+                <p>Manage users, salary rules, locations, analytics, and overall application monitoring from one premium control center.</p>
+            </div>
+        </div>
+
+        @if(session('success'))
+            <div class="panel" style="border-color: rgba(34,197,94,0.25);">
+                <p style="color:#86efac; font-weight:700;">{{ session('success') }}</p>
+            </div>
+        @endif
+
+        @if($errors->any())
+            <div class="panel" style="border-color: rgba(239,68,68,0.25);">
+                <ul style="padding-left:18px; color:#fecaca;">
+                    @foreach($errors->all() as $error)
+                        <li style="margin:6px 0;">{{ $error }}</li>
+                    @endforeach
+                </ul>
+            </div>
+        @endif
+
+        <div class="stats-grid">
+            <div class="stat-card">
+                <p>Total Users</p>
+                <h3>{{ $totalUsers }}</h3>
             </div>
 
-            @if(session('success'))
-                <div style="
-                    background: #ecfdf5;
-                    border: 1px solid #86efac;
-                    color: #166534;
-                    padding: 16px 20px;
-                    border-radius: 16px;
-                    margin-bottom: 20px;
-                    font-weight: 600;
-                ">
-                    {{ session('success') }}
-                </div>
-            @endif
+            <div class="stat-card">
+                <p>Total Calculations</p>
+                <h3 class="text-green">{{ $totalCalculations }}</h3>
+            </div>
 
-            @if($errors->any())
-                <div style="
-                    background: #fef2f2;
-                    border: 1px solid #fca5a5;
-                    color: #b91c1c;
-                    padding: 16px 20px;
-                    border-radius: 16px;
-                    margin-bottom: 20px;
-                    font-weight: 600;
-                ">
-                    <ul style="margin:0; padding-left:18px;">
-                        @foreach($errors->all() as $error)
-                            <li style="margin:4px 0;">{{ $error }}</li>
+            <div class="stat-card">
+                <p>Total Job Roles</p>
+                <h3 class="text-purple">{{ $totalJobRoles }}</h3>
+            </div>
+
+            <div class="stat-card">
+                <p>Total Locations</p>
+                <h3 class="text-orange">{{ $totalLocations }}</h3>
+            </div>
+
+            <div class="stat-card">
+                <p>Most Selected Role</p>
+                <h3>{{ $mostSelectedJobRole?->job_title ?? 'N/A' }}</h3>
+            </div>
+
+            <div class="stat-card">
+                <p>Most Selected Location</p>
+                <h3>{{ $mostSelectedLocation?->location ?? 'N/A' }}</h3>
+            </div>
+
+            <div class="stat-card">
+                <p>Average Salary</p>
+                <h3 class="text-green">£{{ number_format($averageSalary, 2) }}</h3>
+            </div>
+
+            <div class="stat-card">
+                <p>Highest Salary</p>
+                <h3 class="text-green">£{{ number_format($highestSalary, 2) }}</h3>
+            </div>
+
+            <div class="stat-card">
+                <p>Active Roles</p>
+                <h3 class="text-purple">{{ $totalActiveRoles }}</h3>
+            </div>
+
+            <div class="stat-card">
+                <p>Active Locations</p>
+                <h3 class="text-orange">{{ $totalActiveLocations }}</h3>
+            </div>
+        </div>
+
+        <div class="panel">
+            <div class="panel-title-row">
+                <h2>All Users</h2>
+                <div class="top-actions">
+                    <a href="{{ route('home') }}" class="top-action-btn">Back to Home</a>
+                </div>
+            </div>
+
+            <div class="table-wrap">
+                <table class="premium-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Name</th>
+                            <th>Email</th>
+                            <th>Admin</th>
+                            <th>Active</th>
+                            <th>Calculation Count</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach($users as $user)
+                            <tr>
+                                <td>{{ $user->id }}</td>
+                                <td>{{ $user->name }}</td>
+                                <td>{{ $user->email }}</td>
+                                <td>{{ $user->is_admin ? 'Yes' : 'No' }}</td>
+                                <td>
+                                    <span class="status-pill {{ $user->is_active ? 'active' : 'inactive' }}">
+                                        {{ $user->is_active ? 'Active' : 'Inactive' }}
+                                    </span>
+                                </td>
+                                <td>{{ $user->salary_calculations_count }}</td>
+                                <td>
+                                    <div class="inline-actions">
+                                        @if(!$user->is_admin)
+                                            <form action="{{ route('admin.user.promote', $user->id) }}" method="POST" class="table-form">
+                                                @csrf
+                                                @method('PATCH')
+                                                <button type="submit" class="table-btn blue">Promote Admin</button>
+                                            </form>
+                                        @endif
+
+                                        @if($user->id !== auth()->id())
+                                            <form action="{{ route('admin.user.toggle', $user->id) }}" method="POST" class="table-form">
+                                                @csrf
+                                                @method('PATCH')
+                                                <button type="submit" class="table-btn {{ $user->is_active ? 'red' : 'green' }}">
+                                                    {{ $user->is_active ? 'Deactivate' : 'Activate' }}
+                                                </button>
+                                            </form>
+                                        @endif
+                                    </div>
+                                </td>
+                            </tr>
                         @endforeach
-                    </ul>
-                </div>
-            @endif
+                    </tbody>
+                </table>
+            </div>
+        </div>
 
-            <div style="
-                display: grid;
-                grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-                gap: 20px;
-                margin-bottom: 25px;
-            ">
-                <div style="background: white; border-radius: 20px; padding: 24px; box-shadow: 0 12px 30px rgba(15, 23, 42, 0.08); border: 1px solid #e2e8f0;">
-                    <p style="color: #64748b; font-size: 14px; margin-bottom: 10px;">Total Users</p>
-                    <h2 style="font-size: 30px; font-weight: 700; color: #0f172a;">{{ $totalUsers }}</h2>
-                </div>
-
-                <div style="background: white; border-radius: 20px; padding: 24px; box-shadow: 0 12px 30px rgba(15, 23, 42, 0.08); border: 1px solid #e2e8f0;">
-                    <p style="color: #64748b; font-size: 14px; margin-bottom: 10px;">Total Calculations</p>
-                    <h2 style="font-size: 30px; font-weight: 700; color: #16a34a;">{{ $totalCalculations }}</h2>
-                </div>
-
-                <div style="background: white; border-radius: 20px; padding: 24px; box-shadow: 0 12px 30px rgba(15, 23, 42, 0.08); border: 1px solid #e2e8f0;">
-                    <p style="color: #64748b; font-size: 14px; margin-bottom: 10px;">Total Job Roles</p>
-                    <h2 style="font-size: 30px; font-weight: 700; color: #7c3aed;">{{ $totalJobRoles }}</h2>
-                </div>
-
-                <div style="background: white; border-radius: 20px; padding: 24px; box-shadow: 0 12px 30px rgba(15, 23, 42, 0.08); border: 1px solid #e2e8f0;">
-                    <p style="color: #64748b; font-size: 14px; margin-bottom: 10px;">Total Locations</p>
-                    <h2 style="font-size: 30px; font-weight: 700; color: #ea580c;">{{ $totalLocations }}</h2>
-                </div>
-
-                <div style="background: white; border-radius: 20px; padding: 24px; box-shadow: 0 12px 30px rgba(15, 23, 42, 0.08); border: 1px solid #e2e8f0;">
-                    <p style="color: #64748b; font-size: 14px; margin-bottom: 10px;">Most Selected Role</p>
-                    <h2 style="font-size: 22px; font-weight: 700; color: #0f172a;">
-                        {{ $mostSelectedJobRole?->job_title ?? 'N/A' }}
-                    </h2>
-                </div>
-
-                <div style="background: white; border-radius: 20px; padding: 24px; box-shadow: 0 12px 30px rgba(15, 23, 42, 0.08); border: 1px solid #e2e8f0;">
-                    <p style="color: #64748b; font-size: 14px; margin-bottom: 10px;">Most Selected Location</p>
-                    <h2 style="font-size: 22px; font-weight: 700; color: #0f172a;">
-                        {{ $mostSelectedLocation?->location ?? 'N/A' }}
-                    </h2>
-                </div>
-
-                <div style="background: white; border-radius: 20px; padding: 24px; box-shadow: 0 12px 30px rgba(15, 23, 42, 0.08); border: 1px solid #e2e8f0;">
-                    <p style="color: #64748b; font-size: 14px; margin-bottom: 10px;">Average Salary</p>
-                    <h2 style="font-size: 22px; font-weight: 700; color: #16a34a;">
-                        £{{ number_format($averageSalary, 2) }}
-                    </h2>
-                </div>
-
-                <div style="background: white; border-radius: 20px; padding: 24px; box-shadow: 0 12px 30px rgba(15, 23, 42, 0.08); border: 1px solid #e2e8f0;">
-                    <p style="color: #64748b; font-size: 14px; margin-bottom: 10px;">Highest Salary</p>
-                    <h2 style="font-size: 22px; font-weight: 700; color: #16a34a;">
-                        £{{ number_format($highestSalary, 2) }}
-                    </h2>
-                </div>
-
-                <div style="background: white; border-radius: 20px; padding: 24px; box-shadow: 0 12px 30px rgba(15, 23, 42, 0.08); border: 1px solid #e2e8f0;">
-                    <p style="color: #64748b; font-size: 14px; margin-bottom: 10px;">Active Roles</p>
-                    <h2 style="font-size: 22px; font-weight: 700; color: #7c3aed;">
-                        {{ $totalActiveRoles }}
-                    </h2>
-                </div>
-
-                <div style="background: white; border-radius: 20px; padding: 24px; box-shadow: 0 12px 30px rgba(15, 23, 42, 0.08); border: 1px solid #e2e8f0;">
-                    <p style="color: #64748b; font-size: 14px; margin-bottom: 10px;">Active Locations</p>
-                    <h2 style="font-size: 22px; font-weight: 700; color: #ea580c;">
-                        {{ $totalActiveLocations }}
-                    </h2>
-                </div>
+        <div class="panel">
+            <div class="panel-title-row">
+                <h2>Add New Job Role</h2>
             </div>
 
-            <div style="background: white; border-radius: 24px; padding: 30px; box-shadow: 0 20px 50px rgba(15, 23, 42, 0.10); border: 1px solid #e2e8f0; margin-bottom: 25px;">
-                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; flex-wrap:wrap; gap:12px;">
-                    <h2 style="font-size: 26px; font-weight: 700; color: #0f172a;">All Users</h2>
-                    <a href="{{ url('/') }}" style="text-decoration:none; background:#2563eb; color:white; padding:10px 16px; border-radius:12px; font-size:14px; font-weight:600;">
-                        Back to Home
-                    </a>
+            <form action="{{ route('admin.jobrole.add') }}" method="POST" class="glass-form-grid">
+                @csrf
+
+                <div>
+                    <label>Role Name</label>
+                    <input type="text" name="role_name" class="glass-input" required>
                 </div>
 
-                <div style="overflow-x:auto;">
-                    <table style="width:100%; border-collapse: collapse;">
-                        <thead>
-                            <tr style="background:#0f172a; color:white;">
-                                <th style="padding:14px; text-align:left;">ID</th>
-                                <th style="padding:14px; text-align:left;">Name</th>
-                                <th style="padding:14px; text-align:left;">Email</th>
-                                <th style="padding:14px; text-align:left;">Admin</th>
-                                <th style="padding:14px; text-align:left;">Active</th>
-                                <th style="padding:14px; text-align:left;">Calculation Count</th>
-                                <th style="padding:14px; text-align:left;">Actions</th>
+                <div>
+                    <label>Base Salary</label>
+                    <input type="number" name="base_salary" class="glass-input" min="0" required>
+                </div>
+
+                <div>
+                    <label>Experience Increment</label>
+                    <input type="number" name="experience_increment" class="glass-input" min="0" required>
+                </div>
+
+                <div>
+                    <button type="submit" class="form-submit-btn">Add Job Role</button>
+                </div>
+            </form>
+        </div>
+
+        <div class="panel">
+            <div class="panel-title-row">
+                <h2>Job Roles & Salary Rules</h2>
+            </div>
+
+            <div class="table-wrap">
+                <table class="premium-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Role Name</th>
+                            <th>Base Salary</th>
+                            <th>Experience Increment</th>
+                            <th>Status</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @forelse($jobRoles as $role)
+                            <tr>
+                                <td>{{ $role->id }}</td>
+                                <td>{{ $role->role_name }}</td>
+                                <td>£{{ $role->base_salary }}</td>
+                                <td>£{{ $role->experience_increment }}</td>
+                                <td>
+                                    <span class="status-pill {{ $role->is_active ? 'active' : 'inactive' }}">
+                                        {{ $role->is_active ? 'Active' : 'Inactive' }}
+                                    </span>
+                                </td>
+                                <td>
+                                    <form action="{{ route('admin.role.toggle', $role->id) }}" method="POST" class="table-form">
+                                        @csrf
+                                        @method('PATCH')
+                                        <button type="submit" class="table-btn {{ $role->is_active ? 'red' : 'green' }}">
+                                            {{ $role->is_active ? 'Deactivate' : 'Activate' }}
+                                        </button>
+                                    </form>
+                                </td>
                             </tr>
-                        </thead>
-                        <tbody>
-                            @foreach($users as $user)
-                                <tr style="border-bottom:1px solid #e2e8f0;">
-                                    <td style="padding:14px;">{{ $user->id }}</td>
-                                    <td style="padding:14px;">{{ $user->name }}</td>
-                                    <td style="padding:14px;">{{ $user->email }}</td>
-                                    <td style="padding:14px;">{{ $user->is_admin ? 'Yes' : 'No' }}</td>
-                                    <td style="padding:14px;">
-                                        <span style="
-                                            padding:6px 10px;
-                                            border-radius:999px;
-                                            font-size:12px;
-                                            font-weight:700;
-                                            color:white;
-                                            background: {{ $user->is_active ? '#16a34a' : '#dc2626' }};
-                                        ">
-                                            {{ $user->is_active ? 'Active' : 'Inactive' }}
-                                        </span>
-                                    </td>
-                                    <td style="padding:14px;">{{ $user->salary_calculations_count }}</td>
-                                    <td style="padding:14px;">
-                                        <div style="display:flex; gap:8px; flex-wrap:wrap;">
-                                            @if(!$user->is_admin)
-                                                <form action="{{ route('admin.user.promote', $user->id) }}" method="POST">
-                                                    @csrf
-                                                    @method('PATCH')
-                                                    <button type="submit" style="
-                                                        background:#2563eb;
-                                                        color:white;
-                                                        border:none;
-                                                        padding:8px 12px;
-                                                        border-radius:10px;
-                                                        font-size:13px;
-                                                        font-weight:600;
-                                                        cursor:pointer;
-                                                    ">
-                                                        Promote Admin
-                                                    </button>
-                                                </form>
-                                            @endif
-
-                                            @if($user->id !== auth()->id())
-                                                <form action="{{ route('admin.user.toggle', $user->id) }}" method="POST">
-                                                    @csrf
-                                                    @method('PATCH')
-                                                    <button type="submit" style="
-                                                        background: {{ $user->is_active ? '#dc2626' : '#16a34a' }};
-                                                        color:white;
-                                                        border:none;
-                                                        padding:8px 12px;
-                                                        border-radius:10px;
-                                                        font-size:13px;
-                                                        font-weight:600;
-                                                        cursor:pointer;
-                                                    ">
-                                                        {{ $user->is_active ? 'Deactivate' : 'Activate' }}
-                                                    </button>
-                                                </form>
-                                            @endif
-                                        </div>
-                                    </td>
-                                </tr>
-                            @endforeach
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-
-            <div style="background: white; border-radius: 24px; padding: 30px; box-shadow: 0 20px 50px rgba(15, 23, 42, 0.10); border: 1px solid #e2e8f0; margin-bottom: 25px;">
-                <h2 style="font-size: 26px; font-weight: 700; color: #0f172a; margin-bottom: 20px;">Add New Job Role</h2>
-
-                <form action="{{ route('admin.jobrole.add') }}" method="POST" style="display:grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; align-items:end;">
-                    @csrf
-
-                    <div>
-                        <label style="display:block; margin-bottom:8px; font-weight:600; color:#334155;">Role Name</label>
-                        <input type="text" name="role_name" required style="width:100%; padding:12px 14px; border:1px solid #cbd5e1; border-radius:12px;">
-                    </div>
-
-                    <div>
-                        <label style="display:block; margin-bottom:8px; font-weight:600; color:#334155;">Base Salary</label>
-                        <input type="number" name="base_salary" min="0" required style="width:100%; padding:12px 14px; border:1px solid #cbd5e1; border-radius:12px;">
-                    </div>
-
-                    <div>
-                        <label style="display:block; margin-bottom:8px; font-weight:600; color:#334155;">Experience Increment</label>
-                        <input type="number" name="experience_increment" min="0" required style="width:100%; padding:12px 14px; border:1px solid #cbd5e1; border-radius:12px;">
-                    </div>
-
-                    <div>
-                        <button type="submit" style="background:#2563eb; color:white; border:none; padding:12px 18px; border-radius:12px; font-size:14px; font-weight:600; cursor:pointer; width:100%;">
-                            Add Job Role
-                        </button>
-                    </div>
-                </form>
-            </div>
-
-            <div style="background: white; border-radius: 24px; padding: 30px; box-shadow: 0 20px 50px rgba(15, 23, 42, 0.10); border: 1px solid #e2e8f0; margin-bottom: 25px;">
-                <h2 style="font-size: 26px; font-weight: 700; color: #0f172a; margin-bottom: 20px;">Job Roles & Salary Rules</h2>
-
-                <div style="overflow-x:auto;">
-                    <table style="width:100%; border-collapse: collapse;">
-                        <thead>
-                            <tr style="background:#0f172a; color:white;">
-                                <th style="padding:14px; text-align:left;">ID</th>
-                                <th style="padding:14px; text-align:left;">Role Name</th>
-                                <th style="padding:14px; text-align:left;">Base Salary</th>
-                                <th style="padding:14px; text-align:left;">Experience Increment</th>
-                                <th style="padding:14px; text-align:left;">Status</th>
-                                <th style="padding:14px; text-align:left;">Action</th>
+                        @empty
+                            <tr>
+                                <td colspan="6">No job roles found.</td>
                             </tr>
-                        </thead>
-                        <tbody>
-                            @forelse($jobRoles as $role)
-                                <tr style="border-bottom:1px solid #e2e8f0;">
-                                    <td style="padding:14px;">{{ $role->id }}</td>
-                                    <td style="padding:14px;">{{ $role->role_name }}</td>
-                                    <td style="padding:14px;">£{{ $role->base_salary }}</td>
-                                    <td style="padding:14px;">£{{ $role->experience_increment }}</td>
-                                    <td style="padding:14px;">
-                                        <span style="
-                                            padding:6px 10px;
-                                            border-radius:999px;
-                                            font-size:12px;
-                                            font-weight:700;
-                                            color:white;
-                                            background: {{ $role->is_active ? '#16a34a' : '#dc2626' }};
-                                        ">
-                                            {{ $role->is_active ? 'Active' : 'Inactive' }}
-                                        </span>
-                                    </td>
-                                    <td style="padding:14px;">
-                                        <form action="{{ route('admin.role.toggle', $role->id) }}" method="POST">
-                                            @csrf
-                                            @method('PATCH')
-                                            <button type="submit" style="
-                                                background: {{ $role->is_active ? '#dc2626' : '#16a34a' }};
-                                                color:white;
-                                                border:none;
-                                                padding:8px 12px;
-                                                border-radius:10px;
-                                                font-size:13px;
-                                                font-weight:600;
-                                                cursor:pointer;
-                                            ">
-                                                {{ $role->is_active ? 'Deactivate' : 'Activate' }}
-                                            </button>
-                                        </form>
-                                    </td>
-                                </tr>
-                            @empty
-                                <tr>
-                                    <td colspan="6" style="padding:14px; text-align:center; color:#64748b;">No job roles found.</td>
-                                </tr>
-                            @endforelse
-                        </tbody>
-                    </table>
+                        @endforelse
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="panel">
+            <div class="panel-title-row">
+                <h2>Add New Location Bonus</h2>
+            </div>
+
+            <form action="{{ route('admin.location.add') }}" method="POST" class="glass-form-grid">
+                @csrf
+
+                <div>
+                    <label>Location Name</label>
+                    <input type="text" name="location_name" class="glass-input" required>
                 </div>
+
+                <div>
+                    <label>Bonus Amount</label>
+                    <input type="number" name="bonus_amount" class="glass-input" min="0" required>
+                </div>
+
+                <div>
+                    <button type="submit" class="form-submit-btn orange">Add Location Bonus</button>
+                </div>
+            </form>
+        </div>
+
+        <div class="panel">
+            <div class="panel-title-row">
+                <h2>Location Bonuses</h2>
             </div>
 
-            <div style="background: white; border-radius: 24px; padding: 30px; box-shadow: 0 20px 50px rgba(15, 23, 42, 0.10); border: 1px solid #e2e8f0; margin-bottom: 25px;">
-                <h2 style="font-size: 26px; font-weight: 700; color: #0f172a; margin-bottom: 20px;">Add New Location Bonus</h2>
-
-                <form action="{{ route('admin.location.add') }}" method="POST" style="display:grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; align-items:end;">
-                    @csrf
-
-                    <div>
-                        <label style="display:block; margin-bottom:8px; font-weight:600; color:#334155;">Location Name</label>
-                        <input type="text" name="location_name" required style="width:100%; padding:12px 14px; border:1px solid #cbd5e1; border-radius:12px;">
-                    </div>
-
-                    <div>
-                        <label style="display:block; margin-bottom:8px; font-weight:600; color:#334155;">Bonus Amount</label>
-                        <input type="number" name="bonus_amount" min="0" required style="width:100%; padding:12px 14px; border:1px solid #cbd5e1; border-radius:12px;">
-                    </div>
-
-                    <div>
-                        <button type="submit" style="background:#ea580c; color:white; border:none; padding:12px 18px; border-radius:12px; font-size:14px; font-weight:600; cursor:pointer; width:100%;">
-                            Add Location Bonus
-                        </button>
-                    </div>
-                </form>
-            </div>
-
-            <div style="background: white; border-radius: 24px; padding: 30px; box-shadow: 0 20px 50px rgba(15, 23, 42, 0.10); border: 1px solid #e2e8f0; margin-bottom: 25px;">
-                <h2 style="font-size: 26px; font-weight: 700; color: #0f172a; margin-bottom: 20px;">Location Bonuses</h2>
-
-                <div style="overflow-x:auto;">
-                    <table style="width:100%; border-collapse: collapse;">
-                        <thead>
-                            <tr style="background:#0f172a; color:white;">
-                                <th style="padding:14px; text-align:left;">ID</th>
-                                <th style="padding:14px; text-align:left;">Location Name</th>
-                                <th style="padding:14px; text-align:left;">Bonus Amount</th>
-                                <th style="padding:14px; text-align:left;">Status</th>
-                                <th style="padding:14px; text-align:left;">Action</th>
+            <div class="table-wrap">
+                <table class="premium-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Location Name</th>
+                            <th>Bonus Amount</th>
+                            <th>Status</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @forelse($locationBonuses as $location)
+                            <tr>
+                                <td>{{ $location->id }}</td>
+                                <td>{{ $location->location_name }}</td>
+                                <td>£{{ $location->bonus_amount }}</td>
+                                <td>
+                                    <span class="status-pill {{ $location->is_active ? 'active' : 'inactive' }}">
+                                        {{ $location->is_active ? 'Active' : 'Inactive' }}
+                                    </span>
+                                </td>
+                                <td>
+                                    <form action="{{ route('admin.location.toggle', $location->id) }}" method="POST" class="table-form">
+                                        @csrf
+                                        @method('PATCH')
+                                        <button type="submit" class="table-btn {{ $location->is_active ? 'red' : 'green' }}">
+                                            {{ $location->is_active ? 'Deactivate' : 'Activate' }}
+                                        </button>
+                                    </form>
+                                </td>
                             </tr>
-                        </thead>
-                        <tbody>
-                            @forelse($locationBonuses as $location)
-                                <tr style="border-bottom:1px solid #e2e8f0;">
-                                    <td style="padding:14px;">{{ $location->id }}</td>
-                                    <td style="padding:14px;">{{ $location->location_name }}</td>
-                                    <td style="padding:14px;">£{{ $location->bonus_amount }}</td>
-                                    <td style="padding:14px;">
-                                        <span style="
-                                            padding:6px 10px;
-                                            border-radius:999px;
-                                            font-size:12px;
-                                            font-weight:700;
-                                            color:white;
-                                            background: {{ $location->is_active ? '#16a34a' : '#dc2626' }};
-                                        ">
-                                            {{ $location->is_active ? 'Active' : 'Inactive' }}
-                                        </span>
-                                    </td>
-                                    <td style="padding:14px;">
-                                        <form action="{{ route('admin.location.toggle', $location->id) }}" method="POST">
-                                            @csrf
-                                            @method('PATCH')
-                                            <button type="submit" style="
-                                                background: {{ $location->is_active ? '#dc2626' : '#16a34a' }};
-                                                color:white;
-                                                border:none;
-                                                padding:8px 12px;
-                                                border-radius:10px;
-                                                font-size:13px;
-                                                font-weight:600;
-                                                cursor:pointer;
-                                            ">
-                                                {{ $location->is_active ? 'Deactivate' : 'Activate' }}
-                                            </button>
-                                        </form>
-                                    </td>
-                                </tr>
-                            @empty
-                                <tr>
-                                    <td colspan="5" style="padding:14px; text-align:center; color:#64748b;">No location bonuses found.</td>
-                                </tr>
-                            @endforelse
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-
-            <div style="background: white; border-radius: 24px; padding: 30px; box-shadow: 0 20px 50px rgba(15, 23, 42, 0.10); border: 1px solid #e2e8f0;">
-                <h2 style="font-size: 26px; font-weight: 700; color: #0f172a; margin-bottom: 20px;">All Salary Calculations</h2>
-
-                <div style="overflow-x:auto;">
-                    <table style="width:100%; border-collapse: collapse;">
-                        <thead>
-                            <tr style="background:#0f172a; color:white;">
-                                <th style="padding:14px; text-align:left;">User ID</th>
-                                <th style="padding:14px; text-align:left;">Job Title</th>
-                                <th style="padding:14px; text-align:left;">Experience</th>
-                                <th style="padding:14px; text-align:left;">Location</th>
-                                <th style="padding:14px; text-align:left;">Salary</th>
-                                <th style="padding:14px; text-align:left;">Action</th>
+                        @empty
+                            <tr>
+                                <td colspan="5">No location bonuses found.</td>
                             </tr>
-                        </thead>
-                        <tbody>
-                            @forelse($calculations as $calc)
-                                <tr style="border-bottom:1px solid #e2e8f0;">
-                                    <td style="padding:14px;">{{ $calc->user_id }}</td>
-                                    <td style="padding:14px;">{{ $calc->job_title }}</td>
-                                    <td style="padding:14px;">{{ $calc->experience }}</td>
-                                    <td style="padding:14px;">{{ $calc->location }}</td>
-                                    <td style="padding:14px; font-weight:700; color:#16a34a;">£{{ $calc->calculated_salary }}</td>
-                                    <td style="padding:14px;">
-                                        <form action="{{ route('admin.calculation.delete', $calc->id) }}" method="POST" onsubmit="return confirm('Delete this calculation?');">
-                                            @csrf
-                                            @method('DELETE')
-                                            <button type="submit" style="
-                                                background:#dc2626;
-                                                color:white;
-                                                border:none;
-                                                padding:8px 12px;
-                                                border-radius:10px;
-                                                font-size:13px;
-                                                font-weight:600;
-                                                cursor:pointer;
-                                            ">
-                                                Delete
-                                            </button>
-                                        </form>
-                                    </td>
-                                </tr>
-                            @empty
-                                <tr>
-                                    <td colspan="6" style="padding:14px; text-align:center; color:#64748b;">No salary calculations found.</td>
-                                </tr>
-                            @endforelse
-                        </tbody>
-                    </table>
-                </div>
+                        @endforelse
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="panel">
+            <div class="panel-title-row">
+                <h2>All Salary Calculations</h2>
             </div>
 
+            <div class="table-wrap">
+                <table class="premium-table">
+                    <thead>
+                        <tr>
+                            <th>User ID</th>
+                            <th>Job Title</th>
+                            <th>Experience</th>
+                            <th>Location</th>
+                            <th>Salary</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @forelse($calculations as $calc)
+                            <tr>
+                                <td>{{ $calc->user_id }}</td>
+                                <td>{{ $calc->job_title }}</td>
+                                <td>{{ $calc->experience }}</td>
+                                <td>{{ $calc->location }}</td>
+                                <td class="text-green">£{{ $calc->calculated_salary }}</td>
+                                <td>
+                                    <form action="{{ route('admin.calculation.delete', $calc->id) }}" method="POST" class="table-form" onsubmit="return confirm('Delete this calculation?');">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="table-btn red">Delete</button>
+                                    </form>
+                                </td>
+                            </tr>
+                        @empty
+                            <tr>
+                                <td colspan="6">No salary calculations found.</td>
+                            </tr>
+                        @endforelse
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
-</x-app-layout>
+
+    <div class="footer-wrap">
+        <footer class="site-footer">
+            <p><strong>Daffodil International University</strong></p>
+            <p>Prepared by <strong>Surjya Bhowmick</strong></p>
+            <p>Project developed for the <strong>Web Design Course</strong></p>
+        </footer>
+    </div>
+
+</body>
+</html>

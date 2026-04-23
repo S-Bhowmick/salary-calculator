@@ -44,21 +44,38 @@ Route::post('/calculate', function (Request $request) {
     $experience = (int) $request->experience;
     $experienceBonus = $experience * $jobRole->experience_increment;
     $locationBonusAmount = $locationBonus->bonus_amount;
-    $finalSalary = $baseSalary + $experienceBonus + $locationBonusAmount;
+
+    $annualGrossSalary = $baseSalary + $experienceBonus + $locationBonusAmount;
+    $monthlyGrossSalary = $annualGrossSalary / 12;
+
+    // Simple estimated deductions for demo purpose
+    $estimatedTax = $annualGrossSalary * 0.20;
+    $estimatedNationalInsurance = $annualGrossSalary * 0.08;
+    $estimatedPension = $annualGrossSalary * 0.05;
+
+    $annualNetSalary = $annualGrossSalary - $estimatedTax - $estimatedNationalInsurance - $estimatedPension;
+    $estimatedNetMonthlySalary = $annualNetSalary / 12;
 
     SalaryCalculation::create([
         'user_id' => auth()->id(),
         'job_title' => $jobRole->role_name,
         'experience' => $experience,
         'location' => $locationBonus->location_name,
-        'calculated_salary' => $finalSalary,
+        'calculated_salary' => $annualGrossSalary,
     ]);
 
     return redirect()->route('home')->with([
         'base_salary' => $baseSalary,
         'experience_bonus' => $experienceBonus,
         'location_bonus' => $locationBonusAmount,
-        'salary' => $finalSalary,
+        'salary' => $annualGrossSalary,
+
+        'annual_gross_salary' => $annualGrossSalary,
+        'monthly_gross_salary' => $monthlyGrossSalary,
+        'estimated_tax' => $estimatedTax,
+        'estimated_national_insurance' => $estimatedNationalInsurance,
+        'estimated_pension' => $estimatedPension,
+        'estimated_net_monthly_salary' => $estimatedNetMonthlySalary,
     ]);
 })->middleware('auth')->name('calculate.salary');
 
