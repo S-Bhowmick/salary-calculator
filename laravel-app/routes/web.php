@@ -130,7 +130,7 @@ Route::get('/download-report', function () {
 
     $pdf = Pdf::loadView('report-pdf', compact('calculations', 'user'));
 
-    return $pdf->download('salary-report.pdf');
+    return $pdf->download('uk-salary-report-' . now()->format('Y-m-d') . '.pdf');
 })->middleware('auth')->name('report.download');
 
 Route::get('/admin', function () {
@@ -164,6 +164,19 @@ Route::get('/admin', function () {
     $totalActiveRoles = JobRole::where('is_active', true)->count();
     $totalActiveLocations = LocationBonus::where('is_active', true)->count();
 
+    // Bar chart data: most selected job roles
+    $jobRoleChartData = SalaryCalculation::select('job_title', DB::raw('COUNT(*) as total'))
+        ->groupBy('job_title')
+        ->orderByDesc('total')
+        ->get();
+
+    // Pie chart data: active vs inactive users
+    $userStatusChartLabels = ['Active Users', 'Inactive Users'];
+    $userStatusChartData = [
+        User::where('is_active', true)->count(),
+        User::where('is_active', false)->count(),
+    ];
+
     return view('admin', compact(
         'users',
         'calculations',
@@ -178,7 +191,10 @@ Route::get('/admin', function () {
         'averageSalary',
         'highestSalary',
         'totalActiveRoles',
-        'totalActiveLocations'
+        'totalActiveLocations',
+        'jobRoleChartData',
+        'userStatusChartLabels',
+        'userStatusChartData'
     ));
 })->middleware('auth')->name('admin.panel');
 

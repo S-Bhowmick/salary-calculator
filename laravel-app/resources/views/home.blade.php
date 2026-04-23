@@ -33,7 +33,7 @@
     <section class="hero">
         <div class="hero-content">
             <h1>UK Salary Calculator</h1>
-            <p>Estimate your salary based on job role, experience, and location. Explore breakdowns, monthly take-home estimates, and smarter salary planning in one modern dashboard.</p>
+            <p>Estimate salary, monthly take-home income, city affordability, savings potential, and smarter financial planning in one modern platform.</p>
         </div>
     </section>
 
@@ -62,6 +62,43 @@
                         <option value="{{ $location->location_name }}">{{ $location->location_name }}</option>
                     @endforeach
                 </select>
+
+                <div style="margin-top:24px; padding:18px; border:1px solid rgba(255,255,255,0.08); border-radius:18px; background:rgba(255,255,255,0.02);">
+                    <h3 style="font-size:20px; font-weight:700; margin-bottom:8px; color:var(--text-main);">Monthly Planning (Optional)</h3>
+                    <p style="font-size:14px; color:var(--text-soft); margin-bottom:16px;">Add your expected monthly expenses and a savings goal to see whether the salary works for your real life.</p>
+
+                    <div class="glass-form-grid">
+                        <div>
+                            <label for="rent">Rent</label>
+                            <input type="number" id="rent" name="rent" class="glass-input" min="0" placeholder="0">
+                        </div>
+
+                        <div>
+                            <label for="food">Food</label>
+                            <input type="number" id="food" name="food" class="glass-input" min="0" placeholder="0">
+                        </div>
+
+                        <div>
+                            <label for="transport">Transport</label>
+                            <input type="number" id="transport" name="transport" class="glass-input" min="0" placeholder="0">
+                        </div>
+
+                        <div>
+                            <label for="bills">Bills</label>
+                            <input type="number" id="bills" name="bills" class="glass-input" min="0" placeholder="0">
+                        </div>
+
+                        <div>
+                            <label for="other">Other</label>
+                            <input type="number" id="other" name="other" class="glass-input" min="0" placeholder="0">
+                        </div>
+
+                        <div>
+                            <label for="savings_goal">Savings Goal</label>
+                            <input type="number" id="savings_goal" name="savings_goal" class="glass-input" min="0" placeholder="0">
+                        </div>
+                    </div>
+                </div>
 
                 <button type="submit" class="calculate-btn">Calculate Salary</button>
             </form>
@@ -130,9 +167,108 @@
                             <span class="result-label">Estimated Net Monthly Salary</span>
                             <span class="result-value">£{{ number_format(session('estimated_net_monthly_salary'), 2) }}</span>
                         </div>
+                    </div>
+                </div>
+
+                <div class="result-grid">
+                    <div class="result-card">
+                        <h3 class="result-title">Cost of Living by City</h3>
+
+                        <div class="result-item">
+                            <span class="result-label">Selected Location</span>
+                            <span class="result-value">{{ session('selected_location') }}</span>
+                        </div>
+
+                        <div class="result-item">
+                            <span class="result-label">Estimated City Monthly Cost</span>
+                            <span class="result-value">£{{ number_format(session('city_estimated_monthly_cost'), 2) }}</span>
+                        </div>
+
+                        <div class="result-item">
+                            <span class="result-label">Net Monthly Salary</span>
+                            <span class="result-value">£{{ number_format(session('estimated_net_monthly_salary'), 2) }}</span>
+                        </div>
+
+                        <div class="result-item">
+                            <span class="result-label">Remaining After City Cost</span>
+                            <span class="result-value">£{{ number_format(session('city_remaining_balance'), 2) }}</span>
+                        </div>
+
+                        <div class="result-item">
+                            <span class="result-label">Can I Live in This City?</span>
+                            <span class="result-value">{{ session('affordability_status') }}</span>
+                        </div>
+                    </div>
+
+                    <div class="result-card secondary">
+                        <h3 class="result-title">Monthly Expense Planner</h3>
+
+                        <div class="result-item">
+                            <span class="result-label">Rent</span>
+                            <span class="result-value">£{{ number_format(session('rent'), 2) }}</span>
+                        </div>
+
+                        <div class="result-item">
+                            <span class="result-label">Food</span>
+                            <span class="result-value">£{{ number_format(session('food'), 2) }}</span>
+                        </div>
+
+                        <div class="result-item">
+                            <span class="result-label">Transport</span>
+                            <span class="result-value">£{{ number_format(session('transport'), 2) }}</span>
+                        </div>
+
+                        <div class="result-item">
+                            <span class="result-label">Bills</span>
+                            <span class="result-value">£{{ number_format(session('bills'), 2) }}</span>
+                        </div>
+
+                        <div class="result-item">
+                            <span class="result-label">Other</span>
+                            <span class="result-value">£{{ number_format(session('other'), 2) }}</span>
+                        </div>
+
+                        <div class="result-item">
+                            <span class="result-label">Total Monthly Expenses</span>
+                            <span class="result-value">£{{ number_format(session('total_monthly_expenses'), 2) }}</span>
+                        </div>
+
+                        <div class="result-item">
+                            <span class="result-label">Remaining Balance</span>
+                            <span class="result-value">£{{ number_format(session('remaining_balance'), 2) }}</span>
+                        </div>
+                    </div>
+
+                    <div class="result-card">
+                        <h3 class="result-title">Savings Goal Tracker</h3>
+
+                        <div class="result-item">
+                            <span class="result-label">Savings Goal</span>
+                            <span class="result-value">£{{ number_format(session('savings_goal'), 2) }}</span>
+                        </div>
+
+                        <div class="result-item">
+                            <span class="result-label">Monthly Saving Potential</span>
+                            <span class="result-value">£{{ number_format(max(session('remaining_balance'), 0), 2) }}</span>
+                        </div>
+
+                        <div class="result-item">
+                            <span class="result-label">Months to Reach Goal</span>
+                            <span class="result-value">
+                                @if(session('savings_goal') > 0)
+                                    @if(session('months_to_goal'))
+                                        {{ session('months_to_goal') }} months
+                                    @else
+                                        Not reachable
+                                    @endif
+                                @else
+                                    Not set
+                                @endif
+                            </span>
+                        </div>
 
                         <p class="result-note">
-                            This is an estimated monthly take-home salary for project demonstration purposes.
+                            Compare different roles and cities to find the option that gives you the best monthly balance and fastest savings growth.
                         </p>
                     </div>
                 </div>
