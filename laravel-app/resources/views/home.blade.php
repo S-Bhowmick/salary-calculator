@@ -42,9 +42,10 @@
 
                 <label for="jobTitle">Job Title</label>
                 <select id="jobTitle" name="jobTitle" required>
-                    <option value="Software Developer">Software Developer</option>
-                    <option value="Data Analyst">Data Analyst</option>
-                    <option value="Project Manager">Project Manager</option>
+                    <option value="">Select Job Role</option>
+                    @foreach($jobRoles as $role)
+                        <option value="{{ $role->role_name }}">{{ $role->role_name }}</option>
+                    @endforeach
                 </select>
 
                 <label for="experience">Experience (Years)</label>
@@ -52,11 +53,11 @@
 
                 <label for="location">Location</label>
                 <select id="location" name="location" required>
-                    <option value="London">London</option>
-                    <option value="Manchester">Manchester</option>
-                    <option value="Birmingham">Birmingham</option>
+                <option value="">Select Location</option>
+                @foreach($locations as $location)
+                    <option value="{{ $location->location_name }}">{{ $location->location_name }}</option>
+                @endforeach
                 </select>
-
                 <button type="submit" class="calculate-btn">Calculate Salary</button>
             </form>
 

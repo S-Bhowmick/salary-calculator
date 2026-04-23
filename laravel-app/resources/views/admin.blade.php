@@ -14,7 +14,7 @@
                     Admin Panel
                 </h1>
                 <p style="color: #475569; font-size: 16px;">
-                    Welcome Admin, {{ Auth::user()->name }}. Manage users and salary records here.
+                    Welcome Admin, {{ Auth::user()->name }}. Manage users, salary rules, locations, and salary records here.
                 </p>
             </div>
 
@@ -29,6 +29,24 @@
                     font-weight: 600;
                 ">
                     {{ session('success') }}
+                </div>
+            @endif
+
+            @if($errors->any())
+                <div style="
+                    background: #fef2f2;
+                    border: 1px solid #fca5a5;
+                    color: #b91c1c;
+                    padding: 16px 20px;
+                    border-radius: 16px;
+                    margin-bottom: 20px;
+                    font-weight: 600;
+                ">
+                    <ul style="margin:0; padding-left:18px;">
+                        @foreach($errors->all() as $error)
+                            <li style="margin:4px 0;">{{ $error }}</li>
+                        @endforeach
+                    </ul>
                 </div>
             @endif
 
@@ -47,10 +65,20 @@
                     <p style="color: #64748b; font-size: 14px; margin-bottom: 10px;">Total Calculations</p>
                     <h2 style="font-size: 30px; font-weight: 700; color: #16a34a;">{{ $totalCalculations }}</h2>
                 </div>
+
+                <div style="background: white; border-radius: 20px; padding: 24px; box-shadow: 0 12px 30px rgba(15, 23, 42, 0.08); border: 1px solid #e2e8f0;">
+                    <p style="color: #64748b; font-size: 14px; margin-bottom: 10px;">Total Job Roles</p>
+                    <h2 style="font-size: 30px; font-weight: 700; color: #7c3aed;">{{ $totalJobRoles }}</h2>
+                </div>
+
+                <div style="background: white; border-radius: 20px; padding: 24px; box-shadow: 0 12px 30px rgba(15, 23, 42, 0.08); border: 1px solid #e2e8f0;">
+                    <p style="color: #64748b; font-size: 14px; margin-bottom: 10px;">Total Locations</p>
+                    <h2 style="font-size: 30px; font-weight: 700; color: #ea580c;">{{ $totalLocations }}</h2>
+                </div>
             </div>
 
             <div style="background: white; border-radius: 24px; padding: 30px; box-shadow: 0 20px 50px rgba(15, 23, 42, 0.10); border: 1px solid #e2e8f0; margin-bottom: 25px;">
-                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; flex-wrap:wrap; gap:12px;">
                     <h2 style="font-size: 26px; font-weight: 700; color: #0f172a;">All Users</h2>
                     <a href="{{ url('/') }}" style="text-decoration:none; background:#2563eb; color:white; padding:10px 16px; border-radius:12px; font-size:14px; font-weight:600;">
                         Back to Home
@@ -83,6 +111,119 @@
                 </div>
             </div>
 
+            <div style="background: white; border-radius: 24px; padding: 30px; box-shadow: 0 20px 50px rgba(15, 23, 42, 0.10); border: 1px solid #e2e8f0; margin-bottom: 25px;">
+                <h2 style="font-size: 26px; font-weight: 700; color: #0f172a; margin-bottom: 20px;">Add New Job Role</h2>
+
+                <form action="{{ route('admin.jobrole.add') }}" method="POST" style="display:grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; align-items:end;">
+                    @csrf
+
+                    <div>
+                        <label style="display:block; margin-bottom:8px; font-weight:600; color:#334155;">Role Name</label>
+                        <input type="text" name="role_name" required style="width:100%; padding:12px 14px; border:1px solid #cbd5e1; border-radius:12px;">
+                    </div>
+
+                    <div>
+                        <label style="display:block; margin-bottom:8px; font-weight:600; color:#334155;">Base Salary</label>
+                        <input type="number" name="base_salary" min="0" required style="width:100%; padding:12px 14px; border:1px solid #cbd5e1; border-radius:12px;">
+                    </div>
+
+                    <div>
+                        <label style="display:block; margin-bottom:8px; font-weight:600; color:#334155;">Experience Increment</label>
+                        <input type="number" name="experience_increment" min="0" required style="width:100%; padding:12px 14px; border:1px solid #cbd5e1; border-radius:12px;">
+                    </div>
+
+                    <div>
+                        <button type="submit" style="background:#2563eb; color:white; border:none; padding:12px 18px; border-radius:12px; font-size:14px; font-weight:600; cursor:pointer; width:100%;">
+                            Add Job Role
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <div style="background: white; border-radius: 24px; padding: 30px; box-shadow: 0 20px 50px rgba(15, 23, 42, 0.10); border: 1px solid #e2e8f0; margin-bottom: 25px;">
+                <h2 style="font-size: 26px; font-weight: 700; color: #0f172a; margin-bottom: 20px;">Job Roles & Salary Rules</h2>
+
+                <div style="overflow-x:auto;">
+                    <table style="width:100%; border-collapse: collapse;">
+                        <thead>
+                            <tr style="background:#0f172a; color:white;">
+                                <th style="padding:14px; text-align:left;">ID</th>
+                                <th style="padding:14px; text-align:left;">Role Name</th>
+                                <th style="padding:14px; text-align:left;">Base Salary</th>
+                                <th style="padding:14px; text-align:left;">Experience Increment</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @forelse($jobRoles as $role)
+                                <tr style="border-bottom:1px solid #e2e8f0;">
+                                    <td style="padding:14px;">{{ $role->id }}</td>
+                                    <td style="padding:14px;">{{ $role->role_name }}</td>
+                                    <td style="padding:14px;">£{{ $role->base_salary }}</td>
+                                    <td style="padding:14px;">£{{ $role->experience_increment }}</td>
+                                </tr>
+                            @empty
+                                <tr>
+                                    <td colspan="4" style="padding:14px; text-align:center; color:#64748b;">No job roles found.</td>
+                                </tr>
+                            @endforelse
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div style="background: white; border-radius: 24px; padding: 30px; box-shadow: 0 20px 50px rgba(15, 23, 42, 0.10); border: 1px solid #e2e8f0; margin-bottom: 25px;">
+                <h2 style="font-size: 26px; font-weight: 700; color: #0f172a; margin-bottom: 20px;">Add New Location Bonus</h2>
+
+                <form action="{{ route('admin.location.add') }}" method="POST" style="display:grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; align-items:end;">
+                    @csrf
+
+                    <div>
+                        <label style="display:block; margin-bottom:8px; font-weight:600; color:#334155;">Location Name</label>
+                        <input type="text" name="location_name" required style="width:100%; padding:12px 14px; border:1px solid #cbd5e1; border-radius:12px;">
+                    </div>
+
+                    <div>
+                        <label style="display:block; margin-bottom:8px; font-weight:600; color:#334155;">Bonus Amount</label>
+                        <input type="number" name="bonus_amount" min="0" required style="width:100%; padding:12px 14px; border:1px solid #cbd5e1; border-radius:12px;">
+                    </div>
+
+                    <div>
+                        <button type="submit" style="background:#ea580c; color:white; border:none; padding:12px 18px; border-radius:12px; font-size:14px; font-weight:600; cursor:pointer; width:100%;">
+                            Add Location Bonus
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <div style="background: white; border-radius: 24px; padding: 30px; box-shadow: 0 20px 50px rgba(15, 23, 42, 0.10); border: 1px solid #e2e8f0; margin-bottom: 25px;">
+                <h2 style="font-size: 26px; font-weight: 700; color: #0f172a; margin-bottom: 20px;">Location Bonuses</h2>
+
+                <div style="overflow-x:auto;">
+                    <table style="width:100%; border-collapse: collapse;">
+                        <thead>
+                            <tr style="background:#0f172a; color:white;">
+                                <th style="padding:14px; text-align:left;">ID</th>
+                                <th style="padding:14px; text-align:left;">Location Name</th>
+                                <th style="padding:14px; text-align:left;">Bonus Amount</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @forelse($locationBonuses as $location)
+                                <tr style="border-bottom:1px solid #e2e8f0;">
+                                    <td style="padding:14px;">{{ $location->id }}</td>
+                                    <td style="padding:14px;">{{ $location->location_name }}</td>
+                                    <td style="padding:14px;">£{{ $location->bonus_amount }}</td>
+                                </tr>
+                            @empty
+                                <tr>
+                                    <td colspan="3" style="padding:14px; text-align:center; color:#64748b;">No location bonuses found.</td>
+                                </tr>
+                            @endforelse
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
             <div style="background: white; border-radius: 24px; padding: 30px; box-shadow: 0 20px 50px rgba(15, 23, 42, 0.10); border: 1px solid #e2e8f0;">
                 <h2 style="font-size: 26px; font-weight: 700; color: #0f172a; margin-bottom: 20px;">All Salary Calculations</h2>
 
@@ -99,7 +240,7 @@
                             </tr>
                         </thead>
                         <tbody>
-                            @foreach($calculations as $calc)
+                            @forelse($calculations as $calc)
                                 <tr style="border-bottom:1px solid #e2e8f0;">
                                     <td style="padding:14px;">{{ $calc->user_id }}</td>
                                     <td style="padding:14px;">{{ $calc->job_title }}</td>
@@ -125,7 +266,11 @@
                                         </form>
                                     </td>
                                 </tr>
-                            @endforeach
+                            @empty
+                                <tr>
+                                    <td colspan="6" style="padding:14px; text-align:center; color:#64748b;">No salary calculations found.</td>
+                                </tr>
+                            @endforelse
                         </tbody>
                     </table>
                 </div>

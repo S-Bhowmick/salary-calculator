@@ -2,83 +2,65 @@
 
 use App\Models\User;
 use App\Models\SalaryCalculation;
+use App\Models\JobRole;
+use App\Models\LocationBonus;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ProfileController;
 
-// Redirect root to login if not logged in, otherwise show calculator
+// Home page Route
 Route::get('/', function () {
-    return view('home');
+    $jobRoles = JobRole::orderBy('role_name')->get();
+    $locations = LocationBonus::orderBy('location_name')->get();
+
+    return view('home', compact('jobRoles', 'locations'));
 })->middleware('auth')->name('home');
 
 // Salary calculation route
 Route::post('/calculate', function (Request $request) {
-    $jobTitle = $request->input('jobTitle');
-    $experience = $request->input('experience');
-    $location = $request->input('location');
+    $request->validate([
+        'jobTitle' => 'required',
+        'experience' => 'required|integer|min:0',
+        'location' => 'required',
+    ]);
 
-    $baseSalary = 0;
+    $jobRole = JobRole::where('role_name', $request->jobTitle)->first();
+    $locationBonus = LocationBonus::where('location_name', $request->location)->first();
 
-    if ($jobTitle == "Software Developer") {
-        $baseSalary = 30000 + ($experience * 2000);
-    } elseif ($jobTitle == "Data Analyst") {
-        $baseSalary = 28000 + ($experience * 1800);
-    } elseif ($jobTitle == "Project Manager") {
-        $baseSalary = 35000 + ($experience * 2500);
-    } else {
-        return redirect('/')->with('error', 'Invalid job title');
+    if (!$jobRole) {
+        return redirect()->route('home')->with('error', 'Selected job role not found.');
     }
 
-    if ($location == "London") {
-        $baseSalary += 5000;
-    } elseif ($location == "Manchester") {
-        $baseSalary += 2000;
-    } elseif ($location == "Birmingham") {
-        $baseSalary += 1500;
+    if (!$locationBonus) {
+        return redirect()->route('home')->with('error', 'Selected location not found.');
     }
+
+    $baseSalary = $jobRole->base_salary;
+    $experienceIncrement = $jobRole->experience_increment;
+    $experience = (int) $request->experience;
+    $bonusAmount = $locationBonus->bonus_amount;
+
+    $finalSalary = $baseSalary + ($experience * $experienceIncrement) + $bonusAmount;
 
     SalaryCalculation::create([
         'user_id' => auth()->id(),
-        'job_title' => $jobTitle,
+        'job_title' => $jobRole->role_name,
         'experience' => $experience,
-        'location' => $location,
-        'calculated_salary' => $baseSalary,
+        'location' => $locationBonus->location_name,
+        'calculated_salary' => $finalSalary,
     ]);
 
-    return redirect('/')->with('salary', $baseSalary);
+    return redirect()->route('home')->with('salary', $finalSalary);
 })->middleware('auth')->name('calculate.salary');
 
-Route::delete('/calculation/{id}', function ($id) {
-    $calculation = SalaryCalculation::where('id', $id)
-        ->where('user_id', auth()->id())
-        ->firstOrFail();
-
-    $calculation->delete();
-
-    return redirect()->route('dashboard')->with('success', 'Calculation deleted successfully.');
-})->middleware('auth')->name('calculation.delete');
-
-// Dashboard
+// Dashboard 
 Route::get('/dashboard', function () {
     $calculations = SalaryCalculation::where('user_id', auth()->id())->latest()->get();
 
     return view('dashboard', compact('calculations'));
-})->middleware(['auth'])->name('dashboard');
+})->middleware('auth')->name('dashboard');
 
 // admin
-Route::get('/make-me-admin', function () {
-    $user = auth()->user();
-
-    if (!$user) {
-        return 'Please login first.';
-    }
-
-    $user->is_admin = true;
-    $user->save();
-
-    return 'You are now admin.';
-})->middleware('auth');
-
 Route::get('/admin', function () {
     if (!auth()->user()->is_admin) {
         abort(403, 'Unauthorized access');
@@ -86,11 +68,63 @@ Route::get('/admin', function () {
 
     $users = User::latest()->get();
     $calculations = SalaryCalculation::latest()->get();
+    $jobRoles = JobRole::latest()->get();
+    $locationBonuses = LocationBonus::latest()->get();
+
     $totalUsers = User::count();
     $totalCalculations = SalaryCalculation::count();
+    $totalJobRoles = JobRole::count();
+    $totalLocations = LocationBonus::count();
 
-    return view('admin', compact('users', 'calculations', 'totalUsers', 'totalCalculations'));
+    return view('admin', compact(
+        'users',
+        'calculations',
+        'jobRoles',
+        'locationBonuses',
+        'totalUsers',
+        'totalCalculations',
+        'totalJobRoles',
+        'totalLocations'
+    ));
 })->middleware('auth')->name('admin.panel');
+
+Route::post('/admin/job-role/add', function (Request $request) {
+    if (!auth()->user()->is_admin) {
+        abort(403, 'Unauthorized access');
+    }
+
+    $request->validate([
+        'role_name' => 'required|string|max:255',
+        'base_salary' => 'required|integer|min:0',
+        'experience_increment' => 'required|integer|min:0',
+    ]);
+
+    JobRole::create([
+        'role_name' => $request->role_name,
+        'base_salary' => $request->base_salary,
+        'experience_increment' => $request->experience_increment,
+    ]);
+
+    return redirect()->route('admin.panel')->with('success', 'Job role added successfully.');
+})->middleware('auth')->name('admin.jobrole.add');
+
+Route::post('/admin/location/add', function (Request $request) {
+    if (!auth()->user()->is_admin) {
+        abort(403, 'Unauthorized access');
+    }
+
+    $request->validate([
+        'location_name' => 'required|string|max:255',
+        'bonus_amount' => 'required|integer|min:0',
+    ]);
+
+    LocationBonus::create([
+        'location_name' => $request->location_name,
+        'bonus_amount' => $request->bonus_amount,
+    ]);
+
+    return redirect()->route('admin.panel')->with('success', 'Location bonus added successfully.');
+})->middleware('auth')->name('admin.location.add');
 
 // Delete Calculation
 Route::delete('/admin/calculation/{id}', function ($id) {
