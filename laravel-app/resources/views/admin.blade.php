@@ -439,4 +439,9 @@
 
         </div>
     </div>
+    <div class="site-footer">
+        <p><strong>Daffodil International University</strong></p>
+        <p>Prepared by <strong>Surjya Bhowmick</strong></p>
+        <p>Project developed for the <strong>Web Design Course</strong></p>
+    </div>
 </x-app-layout>

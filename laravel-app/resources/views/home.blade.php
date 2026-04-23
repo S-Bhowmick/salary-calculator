@@ -62,24 +62,68 @@
             </form>
 
             @if(session('salary'))
-                <div class="result-box success-box">
-                    <h3>Salary Breakdown</h3>
+                <div class="result-grid">
+                    <div class="result-card">
+                        <h3 class="result-title">Salary Breakdown</h3>
 
-                    <p><strong>Base Salary:</strong> £{{ number_format(session('base_salary'), 2) }}</p>
-                    <p><strong>Experience Bonus:</strong> £{{ number_format(session('experience_bonus'), 2) }}</p>
-                    <p><strong>Location Bonus:</strong> £{{ number_format(session('location_bonus'), 2) }}</p>
-                    <p><strong>Final Salary:</strong> £{{ number_format(session('salary'), 2) }}</p>
-                </div>
+                        <div class="result-item">
+                            <span class="result-label">Base Salary</span>
+                            <span class="result-value">£{{ number_format(session('base_salary'), 2) }}</span>
+                        </div>
 
-                <div class="result-box success-box" style="margin-top: 20px;">
-                    <h3>Monthly Take-Home Salary Estimate</h3>
+                        <div class="result-item">
+                            <span class="result-label">Experience Bonus</span>
+                            <span class="result-value">£{{ number_format(session('experience_bonus'), 2) }}</span>
+                        </div>
 
-                    <p><strong>Annual Gross Salary:</strong> £{{ number_format(session('annual_gross_salary'), 2) }}</p>
-                    <p><strong>Monthly Gross Salary:</strong> £{{ number_format(session('monthly_gross_salary'), 2) }}</p>
-                    <p><strong>Estimated Tax:</strong> £{{ number_format(session('estimated_tax'), 2) }}</p>
-                    <p><strong>Estimated National Insurance:</strong> £{{ number_format(session('estimated_national_insurance'), 2) }}</p>
-                    <p><strong>Estimated Pension:</strong> £{{ number_format(session('estimated_pension'), 2) }}</p>
-                    <p><strong>Estimated Net Monthly Salary:</strong> £{{ number_format(session('estimated_net_monthly_salary'), 2) }}</p>
+                        <div class="result-item">
+                            <span class="result-label">Location Bonus</span>
+                            <span class="result-value">£{{ number_format(session('location_bonus'), 2) }}</span>
+                        </div>
+
+                        <div class="result-item">
+                            <span class="result-label">Final Salary</span>
+                            <span class="result-value">£{{ number_format(session('salary'), 2) }}</span>
+                        </div>
+                    </div>
+
+                    <div class="result-card secondary">
+                        <h3 class="result-title">Monthly Take-Home Estimate</h3>
+
+                        <div class="result-item">
+                            <span class="result-label">Annual Gross Salary</span>
+                            <span class="result-value">£{{ number_format(session('annual_gross_salary'), 2) }}</span>
+                        </div>
+
+                        <div class="result-item">
+                            <span class="result-label">Monthly Gross Salary</span>
+                            <span class="result-value">£{{ number_format(session('monthly_gross_salary'), 2) }}</span>
+                        </div>
+
+                        <div class="result-item">
+                            <span class="result-label">Estimated Tax</span>
+                            <span class="result-value">£{{ number_format(session('estimated_tax'), 2) }}</span>
+                        </div>
+
+                        <div class="result-item">
+                            <span class="result-label">Estimated National Insurance</span>
+                            <span class="result-value">£{{ number_format(session('estimated_national_insurance'), 2) }}</span>
+                        </div>
+
+                        <div class="result-item">
+                            <span class="result-label">Estimated Pension</span>
+                            <span class="result-value">£{{ number_format(session('estimated_pension'), 2) }}</span>
+                        </div>
+
+                        <div class="result-item">
+                            <span class="result-label">Estimated Net Monthly Salary</span>
+                            <span class="result-value">£{{ number_format(session('estimated_net_monthly_salary'), 2) }}</span>
+                        </div>
+
+                        <p class="result-note">
+                            This is an estimated monthly take-home salary for project demonstration purposes.
+                        </p>
+                    </div>
                 </div>
             @endif
 
@@ -90,6 +134,12 @@
             @endif
         </div>
     </main>
+
+    <footer class="site-footer">
+        <p><strong>Daffodil International University</strong></p>
+        <p>Prepared by <strong>Surjya Bhowmick</strong></p>
+        <p>Project developed for the <strong>Web Design Course</strong></p>
+    </footer>
 
 </body>
 </html>
