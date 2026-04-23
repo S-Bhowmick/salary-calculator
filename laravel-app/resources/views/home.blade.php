@@ -65,10 +65,21 @@
                 <div class="result-box success-box">
                     <h3>Salary Breakdown</h3>
 
-                    <p><strong>Base Salary:</strong> £{{ number_format(session('base_salary')) }}</p>
-                    <p><strong>Experience Bonus:</strong> £{{ number_format(session('experience_bonus')) }}</p>
-                    <p><strong>Location Bonus:</strong> £{{ number_format(session('location_bonus')) }}</p>
-                    <p><strong>Final Salary:</strong> £{{ number_format(session('salary')) }}</p>
+                    <p><strong>Base Salary:</strong> £{{ number_format(session('base_salary'), 2) }}</p>
+                    <p><strong>Experience Bonus:</strong> £{{ number_format(session('experience_bonus'), 2) }}</p>
+                    <p><strong>Location Bonus:</strong> £{{ number_format(session('location_bonus'), 2) }}</p>
+                    <p><strong>Final Salary:</strong> £{{ number_format(session('salary'), 2) }}</p>
+                </div>
+
+                <div class="result-box success-box" style="margin-top: 20px;">
+                    <h3>Monthly Take-Home Salary Estimate</h3>
+
+                    <p><strong>Annual Gross Salary:</strong> £{{ number_format(session('annual_gross_salary'), 2) }}</p>
+                    <p><strong>Monthly Gross Salary:</strong> £{{ number_format(session('monthly_gross_salary'), 2) }}</p>
+                    <p><strong>Estimated Tax:</strong> £{{ number_format(session('estimated_tax'), 2) }}</p>
+                    <p><strong>Estimated National Insurance:</strong> £{{ number_format(session('estimated_national_insurance'), 2) }}</p>
+                    <p><strong>Estimated Pension:</strong> £{{ number_format(session('estimated_pension'), 2) }}</p>
+                    <p><strong>Estimated Net Monthly Salary:</strong> £{{ number_format(session('estimated_net_monthly_salary'), 2) }}</p>
                 </div>
             @endif
 
