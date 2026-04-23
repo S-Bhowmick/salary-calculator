@@ -1,35 +1,26 @@
 <?php
 
 use App\Http\Controllers\ProfileController;
-use App\Models\User;
-use App\Models\SalaryCalculation;
+use App\Http\Requests\CalculateSalaryRequest;
+use App\Http\Requests\StoreJobRoleRequest;
+use App\Http\Requests\StoreLocationBonusRequest;
 use App\Models\JobRole;
 use App\Models\LocationBonus;
+use App\Models\SalaryCalculation;
+use App\Models\User;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
-use Barryvdh\DomPDF\Facade\Pdf;
 
 Route::get('/', function () {
     $jobRoles = JobRole::where('is_active', true)->orderBy('role_name')->get();
     $locations = LocationBonus::where('is_active', true)->orderBy('location_name')->get();
 
     return view('home', compact('jobRoles', 'locations'));
-})->middleware('auth')->name('home');
+})->middleware(['auth', 'verified', 'active'])->name('home');
 
-Route::post('/calculate', function (Request $request) {
-    $request->validate([
-        'jobTitle' => 'required',
-        'experience' => 'required|integer|min:0',
-        'location' => 'required',
-        'rent' => 'nullable|numeric|min:0',
-        'food' => 'nullable|numeric|min:0',
-        'transport' => 'nullable|numeric|min:0',
-        'bills' => 'nullable|numeric|min:0',
-        'other' => 'nullable|numeric|min:0',
-        'savings_goal' => 'nullable|numeric|min:0',
-    ]);
-
+Route::post('/calculate', function (CalculateSalaryRequest $request) {
     $jobRole = JobRole::where('role_name', $request->jobTitle)
         ->where('is_active', true)
         ->first();
@@ -127,13 +118,13 @@ Route::post('/calculate', function (Request $request) {
         'savings_goal' => $savingsGoal,
         'months_to_goal' => $monthsToGoal,
     ]);
-})->middleware('auth')->name('calculate.salary');
+})->middleware(['auth', 'verified', 'active'])->name('calculate.salary');
 
 Route::get('/dashboard', function () {
     $calculations = SalaryCalculation::where('user_id', auth()->id())->latest()->get();
 
     return view('dashboard', compact('calculations'));
-})->middleware('auth')->name('dashboard');
+})->middleware(['auth', 'verified', 'active'])->name('dashboard');
 
 Route::delete('/calculation/{id}', function ($id) {
     $calculation = SalaryCalculation::where('id', $id)
@@ -143,7 +134,7 @@ Route::delete('/calculation/{id}', function ($id) {
     $calculation->delete();
 
     return redirect()->route('dashboard')->with('success', 'Calculation deleted successfully.');
-})->middleware('auth')->name('calculation.delete');
+})->middleware(['auth', 'verified', 'active'])->name('calculation.delete');
 
 Route::post('/favorite-calculation/{id}', function ($id) {
     $calculation = SalaryCalculation::where('id', $id)
@@ -154,7 +145,7 @@ Route::post('/favorite-calculation/{id}', function ($id) {
     $calculation->save();
 
     return redirect()->route('dashboard')->with('success', 'Favorite status updated successfully.');
-})->middleware('auth')->name('calculation.favorite');
+})->middleware(['auth', 'verified', 'active'])->name('calculation.favorite');
 
 Route::post('/compare-calculations', function (Request $request) {
     $selectedIds = $request->input('selected_calculations', []);
@@ -175,7 +166,7 @@ Route::post('/compare-calculations', function (Request $request) {
         ->pluck('estimated_monthly_cost', 'location_name');
 
     return view('compare', compact('comparisons', 'locationCosts'));
-})->middleware('auth')->name('calculations.compare');
+})->middleware(['auth', 'verified', 'active'])->name('calculations.compare');
 
 Route::get('/download-report', function () {
     $calculations = SalaryCalculation::where('user_id', auth()->id())->latest()->get();
@@ -184,13 +175,9 @@ Route::get('/download-report', function () {
     $pdf = Pdf::loadView('report-pdf', compact('calculations', 'user'));
 
     return $pdf->download('uk-salary-report-' . now()->format('Y-m-d') . '.pdf');
-})->middleware('auth')->name('report.download');
+})->middleware(['auth', 'verified', 'active'])->name('report.download');
 
 Route::get('/admin', function () {
-    if (!auth()->user()->is_admin) {
-        abort(403, 'Unauthorized access');
-    }
-
     $users = User::withCount('salaryCalculations')->latest()->get();
     $calculations = SalaryCalculation::latest()->get();
     $jobRoles = JobRole::latest()->get();
@@ -217,13 +204,11 @@ Route::get('/admin', function () {
     $totalActiveRoles = JobRole::where('is_active', true)->count();
     $totalActiveLocations = LocationBonus::where('is_active', true)->count();
 
-    // Bar chart data: most selected job roles
     $jobRoleChartData = SalaryCalculation::select('job_title', DB::raw('COUNT(*) as total'))
         ->groupBy('job_title')
         ->orderByDesc('total')
         ->get();
 
-    // Pie chart data: active vs inactive users
     $userStatusChartLabels = ['Active Users', 'Inactive Users'];
     $userStatusChartData = [
         User::where('is_active', true)->count(),
@@ -249,19 +234,9 @@ Route::get('/admin', function () {
         'userStatusChartLabels',
         'userStatusChartData'
     ));
-})->middleware('auth')->name('admin.panel');
+})->middleware(['auth', 'verified', 'active', 'admin'])->name('admin.panel');
 
-Route::post('/admin/job-role/add', function (Request $request) {
-    if (!auth()->user()->is_admin) {
-        abort(403, 'Unauthorized access');
-    }
-
-    $request->validate([
-        'role_name' => 'required|string|max:255',
-        'base_salary' => 'required|integer|min:0',
-        'experience_increment' => 'required|integer|min:0',
-    ]);
-
+Route::post('/admin/job-role/add', function (StoreJobRoleRequest $request) {
     JobRole::create([
         'role_name' => $request->role_name,
         'base_salary' => $request->base_salary,
@@ -270,19 +245,9 @@ Route::post('/admin/job-role/add', function (Request $request) {
     ]);
 
     return redirect()->route('admin.panel')->with('success', 'Job role added successfully.');
-})->middleware('auth')->name('admin.jobrole.add');
+})->middleware(['auth', 'verified', 'active', 'admin'])->name('admin.jobrole.add');
 
-Route::post('/admin/location/add', function (Request $request) {
-    if (!auth()->user()->is_admin) {
-        abort(403, 'Unauthorized access');
-    }
-
-    $request->validate([
-        'location_name' => 'required|string|max:255',
-        'bonus_amount' => 'required|integer|min:0',
-        'estimated_monthly_cost' => 'required|integer|min:0',
-    ]);
-
+Route::post('/admin/location/add', function (StoreLocationBonusRequest $request) {
     LocationBonus::create([
         'location_name' => $request->location_name,
         'bonus_amount' => $request->bonus_amount,
@@ -291,13 +256,9 @@ Route::post('/admin/location/add', function (Request $request) {
     ]);
 
     return redirect()->route('admin.panel')->with('success', 'Location bonus added successfully.');
-})->middleware('auth')->name('admin.location.add');
+})->middleware(['auth', 'verified', 'active', 'admin'])->name('admin.location.add');
 
 Route::patch('/admin/user/{id}/toggle-active', function ($id) {
-    if (!auth()->user()->is_admin) {
-        abort(403, 'Unauthorized access');
-    }
-
     $user = User::findOrFail($id);
 
     if ($user->id === auth()->id()) {
@@ -308,13 +269,9 @@ Route::patch('/admin/user/{id}/toggle-active', function ($id) {
     $user->save();
 
     return redirect()->route('admin.panel')->with('success', 'User status updated successfully.');
-})->middleware('auth')->name('admin.user.toggle');
+})->middleware(['auth', 'verified', 'active', 'admin'])->name('admin.user.toggle');
 
 Route::patch('/admin/user/{id}/promote', function ($id) {
-    if (!auth()->user()->is_admin) {
-        abort(403, 'Unauthorized access');
-    }
-
     $user = User::findOrFail($id);
 
     if (!$user->is_admin) {
@@ -323,44 +280,32 @@ Route::patch('/admin/user/{id}/promote', function ($id) {
     }
 
     return redirect()->route('admin.panel')->with('success', 'User promoted to admin successfully.');
-})->middleware('auth')->name('admin.user.promote');
+})->middleware(['auth', 'verified', 'active', 'admin'])->name('admin.user.promote');
 
 Route::patch('/admin/job-role/{id}/toggle-active', function ($id) {
-    if (!auth()->user()->is_admin) {
-        abort(403, 'Unauthorized access');
-    }
-
     $role = JobRole::findOrFail($id);
     $role->is_active = !$role->is_active;
     $role->save();
 
     return redirect()->route('admin.panel')->with('success', 'Job role status updated successfully.');
-})->middleware('auth')->name('admin.role.toggle');
+})->middleware(['auth', 'verified', 'active', 'admin'])->name('admin.role.toggle');
 
 Route::patch('/admin/location/{id}/toggle-active', function ($id) {
-    if (!auth()->user()->is_admin) {
-        abort(403, 'Unauthorized access');
-    }
-
     $location = LocationBonus::findOrFail($id);
     $location->is_active = !$location->is_active;
     $location->save();
 
     return redirect()->route('admin.panel')->with('success', 'Location status updated successfully.');
-})->middleware('auth')->name('admin.location.toggle');
+})->middleware(['auth', 'verified', 'active', 'admin'])->name('admin.location.toggle');
 
 Route::delete('/admin/calculation/{id}', function ($id) {
-    if (!auth()->user()->is_admin) {
-        abort(403, 'Unauthorized access');
-    }
-
     $calculation = SalaryCalculation::findOrFail($id);
     $calculation->delete();
 
     return redirect()->route('admin.panel')->with('success', 'Calculation deleted by admin.');
-})->middleware('auth')->name('admin.calculation.delete');
+})->middleware(['auth', 'verified', 'active', 'admin'])->name('admin.calculation.delete');
 
-Route::middleware('auth')->group(function () {
+Route::middleware(['auth', 'verified', 'active'])->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
