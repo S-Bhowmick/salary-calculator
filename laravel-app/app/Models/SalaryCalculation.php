@@ -15,5 +15,6 @@ class SalaryCalculation extends Model
         'experience',
         'location',
         'calculated_salary',
+        'is_favorite',
     ];
 }

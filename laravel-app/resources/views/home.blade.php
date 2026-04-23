@@ -63,8 +63,12 @@
 
             @if(session('salary'))
                 <div class="result-box success-box">
-                    <h3>Estimated Salary</h3>
-                    <p>£{{ session('salary') }}</p>
+                    <h3>Salary Breakdown</h3>
+
+                    <p><strong>Base Salary:</strong> £{{ number_format(session('base_salary')) }}</p>
+                    <p><strong>Experience Bonus:</strong> £{{ number_format(session('experience_bonus')) }}</p>
+                    <p><strong>Location Bonus:</strong> £{{ number_format(session('location_bonus')) }}</p>
+                    <p><strong>Final Salary:</strong> £{{ number_format(session('salary')) }}</p>
                 </div>
             @endif
 

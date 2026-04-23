@@ -26,6 +26,14 @@ class AuthenticatedSessionController extends Controller
     {
         $request->authenticate();
 
+        if (!auth()->user()->is_active) {
+            auth()->logout();
+
+            throw \Illuminate\Validation\ValidationException::withMessages([
+                'email' => 'Your account has been deactivated by admin.',
+            ]);
+        }
+
         $request->session()->regenerate();
 
         return redirect()->intended(route('dashboard', absolute: false));

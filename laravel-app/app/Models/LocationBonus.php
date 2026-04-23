@@ -9,5 +9,6 @@ class LocationBonus extends Model
     protected $fillable = [
         'location_name',
         'bonus_amount',
+        'is_active',
     ];
 }

@@ -32,6 +32,37 @@
                 </div>
             @endif
 
+            @if($calculations->where('is_favorite', true)->count() > 0)
+        <div style="
+            background: white;
+            border-radius: 24px;
+            padding: 24px;
+            box-shadow: 0 20px 50px rgba(15, 23, 42, 0.10);
+            border: 1px solid #e2e8f0;
+            margin-bottom: 25px;
+            ">
+            <h2 style="font-size: 24px; font-weight: 700; color: #0f172a; margin-bottom: 16px;">
+            Favorite Calculations
+            </h2>
+
+        <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap:16px;">
+            @foreach($calculations->where('is_favorite', true) as $favorite)
+                <div style="
+                    border: 1px solid #e2e8f0;
+                    border-radius: 18px;
+                    padding: 18px;
+                    background: #f8fafc;
+                ">
+                    <p style="margin-bottom:8px;"><strong>Job:</strong> {{ $favorite->job_title }}</p>
+                    <p style="margin-bottom:8px;"><strong>Location:</strong> {{ $favorite->location }}</p>
+                    <p style="margin-bottom:8px;"><strong>Experience:</strong> {{ $favorite->experience }} years</p>
+                    <p style="margin-bottom:8px; color:#16a34a; font-weight:700;"><strong>Salary:</strong> £{{ $favorite->calculated_salary }}</p>
+                </div>
+            @endforeach
+            </div>
+            </div>
+            @endif
+
             <div style="
                 display: grid;
                 grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
@@ -100,6 +131,18 @@
                     ">
                         Back to Calculator
                     </a>
+                    <a href="{{ route('report.download') }}" style="
+                        text-decoration:none;
+                        background:#16a34a;
+                        color:white;
+                        padding:10px 16px;
+                        border-radius:12px;
+                        font-size:14px;
+                        font-weight:600;
+                        display:inline-block;
+                    ">
+                        Download PDF Report
+                    </a>
                 </div>
 
                 @if($calculations->count() > 0)
@@ -124,10 +167,30 @@
                     flex-wrap: wrap;
                     gap: 12px;
                 ">
+                <form action="{{ route('calculations.compare') }}" method="POST">
+                    @csrf
+
                     <h2 style="font-size: 26px; font-weight: 700; color: #0f172a;">
                         Salary History
                     </h2>
                 </div>
+                
+                <div style="margin-top:20px;">
+                    <button type="submit" style="
+                        background:#7c3aed;
+                        color:white;
+                        border:none;
+                        padding:12px 18px;
+                        border-radius:12px;
+                        font-size:14px;
+                        font-weight:600;
+                        cursor:pointer;
+                    ">
+                        Compare Selected
+                    </button>
+                </div>
+                </form>
+
 
                 @if($calculations->count() > 0)
                     <div style="overflow-x: auto;">
@@ -138,6 +201,8 @@
                             border-radius: 16px;
                         ">
                             <thead>
+                                <th style="padding: 14px; text-align: left;">Compare</th>
+                                <th style="padding: 14px; text-align: left;">Favorite</th>
                                 <tr style="background: #0f172a; color: white;">
                                     <th style="padding: 14px; text-align: left;">Job Title</th>
                                     <th style="padding: 14px; text-align: left;">Experience</th>
@@ -158,6 +223,27 @@
                                         </td>
                                         <td style="padding: 14px;">
                                             {{ $calc->created_at->format('d M Y') }}
+                                        </td>
+                                        <td style="padding: 14px;">
+                                            <input type="checkbox" name="selected_calculations[]" value="{{ $calc->id }}">
+                                        </td>
+
+                                        <td style="padding: 14px;">
+                                            <form action="{{ route('calculation.favorite', $calc->id) }}" method="POST">
+                                                @csrf
+                                                <button type="submit" style="
+                                                    background: {{ $calc->is_favorite ? '#f59e0b' : '#94a3b8' }};
+                                                    color: white;
+                                                    border: none;
+                                                    padding: 8px 12px;
+                                                    border-radius: 10px;
+                                                    font-size: 13px;
+                                                    font-weight: 600;
+                                                    cursor: pointer;
+                                                ">
+                                                    {{ $calc->is_favorite ? '★ Favorite' : '☆ Mark' }}
+                                                </button>
+                                            </form>
                                         </td>
                                         <td style="padding: 14px;">
                                             <form action="{{ route('calculation.delete', $calc->id) }}" method="POST" onsubmit="return confirm('Are you sure you want to delete this record?');">

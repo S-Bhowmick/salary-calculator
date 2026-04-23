@@ -10,5 +10,6 @@ class JobRole extends Model
         'role_name',
         'base_salary',
         'experience_increment',
+        'is_active',
     ];
 }
