@@ -80,12 +80,10 @@ Route::post('/calculate', function (CalculateSalaryRequest $request) {
         $affordabilityStatus = 'Difficult';
     }
 
-    // Job growth forecast
     $salaryAfter1Year = $baseSalary + (($experience + 1) * $experienceIncrement) + $locationBonusAmount;
     $salaryAfter3Years = $baseSalary + (($experience + 3) * $experienceIncrement) + $locationBonusAmount;
     $salaryAfter5Years = $baseSalary + (($experience + 5) * $experienceIncrement) + $locationBonusAmount;
 
-    // Compare cities for same role
     $allActiveLocations = LocationBonus::where('is_active', true)->orderBy('location_name')->get();
 
     $cityComparisons = $allActiveLocations->map(function ($city) use ($baseSalary, $experience, $experienceIncrement) {
@@ -115,7 +113,7 @@ Route::post('/calculate', function (CalculateSalaryRequest $request) {
         'calculated_salary' => $annualGrossSalary,
     ]);
 
-    return redirect()->route('home')->with([
+    return view('salary-result', [
         'selected_role' => $jobRole->role_name,
         'selected_location' => $locationBonus->location_name,
 
@@ -150,7 +148,7 @@ Route::post('/calculate', function (CalculateSalaryRequest $request) {
         'salary_after_3_years' => $salaryAfter3Years,
         'salary_after_5_years' => $salaryAfter5Years,
 
-        'city_comparisons' => $cityComparisons->toArray(),
+        'city_comparisons' => $cityComparisons,
         'best_city_option' => $bestCityOption,
     ]);
 })->middleware(['auth', 'active'])->name('calculate.salary');
