@@ -1340,3 +1340,18 @@ a:hover {
     gap: 10px;
     margin-top: 18px;
 }
+/* Fix dropdown option visibility */
+select {
+    color: var(--text-main);
+    background-color: rgba(255, 255, 255, 0.04);
+}
+
+select option {
+    background: #ffffff;
+    color: #111827;
+}
+
+/* For better placeholder look */
+select:invalid {
+    color: var(--text-soft);
+}

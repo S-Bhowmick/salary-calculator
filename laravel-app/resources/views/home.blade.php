@@ -77,13 +77,6 @@
                     <p class="panel-subtext">Use the form below to estimate salary and monthly financial planning.</p>
                 </div>
 
-                <div class="top-actions">
-                    <button type="button" class="top-action-btn secondary" title="Salary is calculated using this formula: Base Salary + (Experience × Experience Increment) + Location Bonus">
-                        How salary is calculated
-                    </button>
-                </div>
-            </div>
-            
             <div class="top-actions" style="margin-top:18px;">
                 <a href="{{ route('report.download') }}" class="top-action-btn">Download PDF</a>
                 <a href="{{ route('report.csv') }}" class="top-action-btn">Download CSV</a>
