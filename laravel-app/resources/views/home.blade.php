@@ -83,10 +83,11 @@
                     </button>
                 </div>
             </div>
-
-            <div class="info-tip">
-                <strong>Calculation Formula:</strong>
-                Base Salary + (Experience × Experience Increment) + Location Bonus
+            
+            <div class="top-actions" style="margin-top:18px;">
+                <a href="{{ route('report.download') }}" class="top-action-btn">Download PDF</a>
+                <a href="{{ route('report.csv') }}" class="top-action-btn">Download CSV</a>
+                <a href="{{ route('report.print') }}" class="top-action-btn secondary" target="_blank">Printable Summary</a>
             </div>
 
             <form action="{{ route('calculate.salary') }}" method="POST">
@@ -237,6 +238,104 @@
                 </div>
 
                 <div class="result-grid">
+                    <div class="result-grid">
+                        <div class="result-card">
+                            <h3 class="result-title">Job Growth Forecast</h3>
+
+                            <div class="result-item">
+                                <span class="result-label">Salary After 1 Year</span>
+                                <span class="result-value">£{{ number_format(session('salary_after_1_year'), 2) }}</span>
+                            </div>
+
+                            <div class="result-item">
+                                <span class="result-label">Salary After 3 Years</span>
+                                <span class="result-value">£{{ number_format(session('salary_after_3_years'), 2) }}</span>
+                            </div>
+
+                            <div class="result-item">
+                                <span class="result-label">Salary After 5 Years</span>
+                                <span class="result-value">£{{ number_format(session('salary_after_5_years'), 2) }}</span>
+                            </div>
+
+                            <p class="result-note">
+                                This forecast uses the current role’s yearly experience increment and selected location bonus.
+                            </p>
+                        </div>
+
+                        <div class="result-card secondary">
+                            <h3 class="result-title">Personal Finance Dashboard</h3>
+
+                            <div class="result-item">
+                                <span class="result-label">Monthly Income</span>
+                                <span class="result-value">£{{ number_format(session('estimated_net_monthly_salary'), 2) }}</span>
+                            </div>
+
+                            <div class="result-item">
+                                <span class="result-label">Monthly Expenses</span>
+                                <span class="result-value">£{{ number_format(session('total_monthly_expenses'), 2) }}</span>
+                            </div>
+
+                            <div class="result-item">
+                                <span class="result-label">Savings Potential</span>
+                                <span class="result-value">£{{ number_format(max(session('remaining_balance'), 0), 2) }}</span>
+                            </div>
+
+                            <div class="result-item">
+                                <span class="result-label">Best Role/Location Recommendation</span>
+                                <span class="result-value">
+                                    @if(session('best_city_option'))
+                                        {{ session('selected_role') }} - {{ session('best_city_option.location') }}
+                                    @else
+                                        Not available
+                                    @endif
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+
+                    @if(session('city_comparisons'))
+                    <div class="panel" style="margin-top:24px;">
+                        <div class="panel-title-row">
+                            <div>
+                                <h2>Compare Cities</h2>
+                                <p class="panel-subtext">Same role, different city, different lifestyle outcome.</p>
+                            </div>
+                        </div>
+
+                        <div class="table-wrap">
+                            <table class="premium-table">
+                                <thead>
+                                    <tr>
+                                        <th>City</th>
+                                        <th>Annual Gross</th>
+                                        <th>Net Monthly</th>
+                                        <th>Monthly Cost</th>
+                                        <th>Remaining Balance</th>
+                                        <th>Recommendation</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach(session('city_comparisons') as $city)
+                                        <tr>
+                                            <td>{{ $city['location'] }}</td>
+                                            <td>£{{ number_format($city['gross_salary'], 2) }}</td>
+                                            <td class="text-blue">£{{ number_format($city['net_monthly'], 2) }}</td>
+                                            <td>£{{ number_format($city['monthly_cost'], 2) }}</td>
+                                            <td class="text-orange">£{{ number_format($city['remaining_balance'], 2) }}</td>
+                                            <td>
+                                                @if(session('best_city_option') && $city['location'] === session('best_city_option.location'))
+                                                    <span class="status-pill active">Best Choice</span>
+                                                @else
+                                                    <span class="status-pill inactive" style="background:#475569;">Alternative</span>
+                                                @endif
+                                            </td>
+                                        </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                @endif
                     <div class="result-card">
                         <h3 class="result-title">Cost of Living by City</h3>
 

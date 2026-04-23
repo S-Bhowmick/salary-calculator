@@ -12,6 +12,7 @@ use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 Route::get('/', function () {
     $jobRoles = JobRole::where('is_active', true)->orderBy('role_name')->get();
@@ -39,10 +40,10 @@ Route::post('/calculate', function (CalculateSalaryRequest $request) {
 
     $baseSalary = $jobRole->base_salary;
     $experience = (int) $request->experience;
-    $experienceBonus = $experience * $jobRole->experience_increment;
+    $experienceIncrement = $jobRole->experience_increment;
     $locationBonusAmount = $locationBonus->bonus_amount;
 
-    $annualGrossSalary = $baseSalary + $experienceBonus + $locationBonusAmount;
+    $annualGrossSalary = $baseSalary + ($experience * $experienceIncrement) + $locationBonusAmount;
     $monthlyGrossSalary = $annualGrossSalary / 12;
 
     $estimatedTax = $annualGrossSalary * 0.20;
@@ -79,6 +80,33 @@ Route::post('/calculate', function (CalculateSalaryRequest $request) {
         $affordabilityStatus = 'Difficult';
     }
 
+    // Job growth forecast
+    $salaryAfter1Year = $baseSalary + (($experience + 1) * $experienceIncrement) + $locationBonusAmount;
+    $salaryAfter3Years = $baseSalary + (($experience + 3) * $experienceIncrement) + $locationBonusAmount;
+    $salaryAfter5Years = $baseSalary + (($experience + 5) * $experienceIncrement) + $locationBonusAmount;
+
+    // Compare cities for same role
+    $allActiveLocations = LocationBonus::where('is_active', true)->orderBy('location_name')->get();
+
+    $cityComparisons = $allActiveLocations->map(function ($city) use ($baseSalary, $experience, $experienceIncrement) {
+        $gross = $baseSalary + ($experience * $experienceIncrement) + $city->bonus_amount;
+        $tax = $gross * 0.20;
+        $ni = $gross * 0.08;
+        $pension = $gross * 0.05;
+        $netMonthly = ($gross - $tax - $ni - $pension) / 12;
+        $remaining = $netMonthly - ($city->estimated_monthly_cost ?? 0);
+
+        return [
+            'location' => $city->location_name,
+            'gross_salary' => $gross,
+            'net_monthly' => $netMonthly,
+            'monthly_cost' => $city->estimated_monthly_cost ?? 0,
+            'remaining_balance' => $remaining,
+        ];
+    })->sortByDesc('remaining_balance')->values();
+
+    $bestCityOption = $cityComparisons->first();
+
     SalaryCalculation::create([
         'user_id' => auth()->id(),
         'job_title' => $jobRole->role_name,
@@ -92,7 +120,7 @@ Route::post('/calculate', function (CalculateSalaryRequest $request) {
         'selected_location' => $locationBonus->location_name,
 
         'base_salary' => $baseSalary,
-        'experience_bonus' => $experienceBonus,
+        'experience_bonus' => $experience * $experienceIncrement,
         'location_bonus' => $locationBonusAmount,
         'salary' => $annualGrossSalary,
 
@@ -117,6 +145,13 @@ Route::post('/calculate', function (CalculateSalaryRequest $request) {
 
         'savings_goal' => $savingsGoal,
         'months_to_goal' => $monthsToGoal,
+
+        'salary_after_1_year' => $salaryAfter1Year,
+        'salary_after_3_years' => $salaryAfter3Years,
+        'salary_after_5_years' => $salaryAfter5Years,
+
+        'city_comparisons' => $cityComparisons->toArray(),
+        'best_city_option' => $bestCityOption,
     ]);
 })->middleware(['auth', 'active'])->name('calculate.salary');
 
@@ -304,6 +339,54 @@ Route::delete('/admin/calculation/{id}', function ($id) {
 
     return redirect()->route('admin.panel')->with('success', 'Calculation deleted by admin.');
 })->middleware(['auth', 'active', 'admin'])->name('admin.calculation.delete');
+
+Route::get('/download-report-csv', function () {
+    $calculations = SalaryCalculation::where('user_id', auth()->id())->latest()->get();
+
+    $response = new StreamedResponse(function () use ($calculations) {
+        $handle = fopen('php://output', 'w');
+
+        fputcsv($handle, [
+            'Job Title',
+            'Experience',
+            'Location',
+            'Annual Gross Salary',
+            'Estimated Net Monthly Salary',
+            'Date',
+        ]);
+
+        foreach ($calculations as $calc) {
+            $annualGross = $calc->calculated_salary;
+            $tax = $annualGross * 0.20;
+            $ni = $annualGross * 0.08;
+            $pension = $annualGross * 0.05;
+            $netMonthly = ($annualGross - $tax - $ni - $pension) / 12;
+
+            fputcsv($handle, [
+                $calc->job_title,
+                $calc->experience . ' years',
+                $calc->location,
+                number_format($annualGross, 2, '.', ''),
+                number_format($netMonthly, 2, '.', ''),
+                $calc->created_at->format('Y-m-d'),
+            ]);
+        }
+
+        fclose($handle);
+    });
+
+    $response->headers->set('Content-Type', 'text/csv');
+    $response->headers->set('Content-Disposition', 'attachment; filename="salary-report.csv"');
+
+    return $response;
+})->middleware(['auth', 'active'])->name('report.csv');
+
+Route::get('/print-summary', function () {
+    $calculations = SalaryCalculation::where('user_id', auth()->id())->latest()->get();
+    $user = auth()->user();
+
+    return view('print-summary', compact('calculations', 'user'));
+})->middleware(['auth', 'active'])->name('report.print');
 
 Route::middleware(['auth', 'active'])->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
